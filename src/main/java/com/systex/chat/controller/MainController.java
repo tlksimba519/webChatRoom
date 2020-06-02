@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.systex.chat.database.Database;
 import com.systex.chat.database.DatabaseModel;
 import com.systex.chat.file.file;
-import com.systex.demo.message.ChatMessage;
+import com.systex.chat.message.ChatMessage;
 
 @Controller
 public class MainController {

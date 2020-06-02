@@ -1,4 +1,4 @@
-package com.systex.demo.message;
+package com.systex.chat.message;
 
 public class ChatMessage {
 
