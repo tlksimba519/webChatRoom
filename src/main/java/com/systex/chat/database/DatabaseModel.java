@@ -14,7 +14,7 @@ public class DatabaseModel {
 	
 	
 	private static final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	private static final String tableName = "AccountInfo";
+	private static final String tableName = "user";
 	private static final String dbInfo = "jdbc:sqlserver://10.10.56.198:1433;"+
 			"databaseName=exercise_db;user=sa;password=systex.6214";
 	public static Connection conn;
