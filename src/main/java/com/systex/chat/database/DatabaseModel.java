@@ -1,5 +1,6 @@
 package com.systex.chat.database;
 
+import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -16,9 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseModel {
 	
-	
 	private static final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	private static final String tableName = "user";
+	private static final String tableName = "ChatMemberAccount";
 	private static final String dbInfo = "jdbc:sqlserver://10.10.56.198:1433;"+
 			"databaseName=exercise_db;user=sa;password=systex.6214";
 	private static final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
@@ -58,7 +58,7 @@ public class DatabaseModel {
 		
 		try {
 			
-			String sql = "SELECT * FROM " + tableName+ " WHERE UID = '"+d.getID()+"' AND ACCOUNT = '"+d.getPasswd()+"'";
+			String sql = "SELECT * FROM " + tableName+ " WHERE UID = '"+d.getID()+"' AND ACCOUNT = '"+hash(d.getPasswd())+"'";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
 			
@@ -83,6 +83,37 @@ public class DatabaseModel {
 
 		conn.close();
 
+	}
+	
+	/*
+	 * MD5加密
+	 */
+	public static String hash(String Unencrypt) {
+		String encrypted = null;
+		try {
+			
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(Unencrypt.getBytes());
+			byte[] bytes = md.digest();
+			
+			StringBuilder sb = new StringBuilder();
+			
+			for(int i=0;i<bytes.length;i++) {
+				
+				sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+				
+			}
+			
+			encrypted = sb.toString();
+		
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+			
+		}
+		
+		return encrypted;
+		
 	}
 	
 	/*
