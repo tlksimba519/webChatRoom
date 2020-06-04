@@ -3,6 +3,7 @@ package com.systex.chat.controller;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,8 +14,10 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.systex.chat.database.Database;
@@ -42,8 +45,10 @@ public class MainController {
 	
 		Connection conn = dm.getConnetion();
 		status = dm.login(d,conn);
-			
+		dm.logout(conn);
+		
 		if(status) {
+			
 			request.getSession().setAttribute("isLogin",UserName);
 			response.sendRedirect("/main.html");
 			
@@ -64,6 +69,18 @@ public class MainController {
 	
 	}
 	
+	@GetMapping("/getHistory")
+	public @ResponseBody Map<String, Object> history() throws SQLException {
+		
+		Connection conn = dm.getConnetion();
+		dm.login(d,conn);
+		Map<String, Object> result = dm.load();
+		dm.logout(conn);
+		
+		return result;
+		
+	}
+	
 	@MessageMapping("/join")
     @SendTo("/topic/public")
     public ChatMessage addUser(@Payload ChatMessage chatMessage, 
@@ -76,14 +93,22 @@ public class MainController {
     
     @MessageMapping("/chat")
     @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-    	/*if(chatMessage.getFileName()!=null) {
-    		f.setContent(chatMessage.getContent());
-    		f.setFile(chatMessage.getFileName());
-    		f.setSender(chatMessage.getSender());
-    		f.save();
-    		
-    	}*/
+    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) throws SQLException {
+    	
+    	Connection conn = dm.getConnetion();
+		dm.login(d,conn);
+		
+		if(chatMessage.getFileName()!=null) {
+			
+			dm.storage(chatMessage.getSender(),chatMessage.getFilePath(),"file");
+			
+		} else {
+			
+			dm.storage(chatMessage.getSender(),chatMessage.getContent(),"text");
+			
+		}
+		
+		dm.logout(conn);
     	return chatMessage; // 返回時會將訊息送至/topic/public
     
     }
