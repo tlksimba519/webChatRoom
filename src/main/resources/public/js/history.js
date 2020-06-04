@@ -6,6 +6,7 @@ $(document).ready(function(){
 		  type : "GET",
 		  url : "/getHistory",
 		  dataType: "json",
+		  async:false,
 		  complete : function(response){
 			  
 			  var data = response.responseJSON;
@@ -29,7 +30,9 @@ $(document).ready(function(){
 			  }
 			  
 		  },
-		  error : alert("無法取得歷史紀錄，請稍後再試!"),
+		  error : function(){
+			  alert("無法取得歷史紀錄，請稍後再試!");
+		  },
 		  
 	});
 	
