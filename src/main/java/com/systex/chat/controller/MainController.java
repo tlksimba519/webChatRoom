@@ -29,9 +29,35 @@ import com.systex.chat.message.ChatMessage;
 public class MainController {
 
 	@Autowired
-	Database d ;
+	Database d;
 	DatabaseModel dm;
 	file f;
+	
+	@PostMapping("/signup")
+	public void signup(@RequestParam String UserName,@RequestParam String Password,HttpServletRequest request,HttpServletResponse response) throws SQLException, IOException {
+
+		boolean status;
+		
+		d.setID(UserName);
+		d.setPasswd(Password);
+	
+		Connection conn = dm.getConnetion();
+		status = dm.signup(d,conn);
+		dm.logout(conn);
+		
+		if(status) {
+			
+			response.sendRedirect("/index.html");
+			
+		}
+		
+		else {
+				
+			response.sendRedirect("/error.html");
+				
+		}
+
+	}
 	
 	@PostMapping("/login")
 	public void login(@RequestParam String UserName,@RequestParam String Password,HttpServletRequest request,HttpServletResponse response) throws SQLException, IOException {

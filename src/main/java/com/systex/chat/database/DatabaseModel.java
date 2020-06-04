@@ -11,14 +11,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseModel {
 	
 	private static final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	private static final String tableName = "ChatMemberAccount";
+	private static final String accountTable = "ChatMemberAccount";
 	private static final String dbInfo = "jdbc:sqlserver://10.10.56.198:1433;"+
 			"databaseName=exercise_db;user=sa;password=systex.6214";
 	private static final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
@@ -50,6 +49,34 @@ public class DatabaseModel {
 	}
 	
 	/*
+	 * 註冊
+	 */
+	public static boolean signup(Database d,Connection conn) throws SQLException {
+
+		boolean status = false;
+		
+		try {
+			
+			String sql = "INSERT INTO " + accountTable + "(USERNAME,PASSWORD) VALUES (?,?)";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, d.getID());
+			ps.setString(2, hash(d.getPasswd()));
+			ps.executeUpdate();
+			status = true;
+
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			conn.close();
+			System.exit(0);
+			
+		}
+
+		return status;
+		
+	}
+	
+	/*
 	 * 登入
 	 */
 	public static boolean login(Database d,Connection conn) throws SQLException {
@@ -58,7 +85,7 @@ public class DatabaseModel {
 		
 		try {
 			
-			String sql = "SELECT * FROM " + tableName+ " WHERE UID = '"+d.getID()+"' AND ACCOUNT = '"+hash(d.getPasswd())+"'";
+			String sql = "SELECT * FROM " + accountTable+ " WHERE USERNAME = '"+d.getID()+"' AND PASSWORD = '"+hash(d.getPasswd())+"'";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
 			
