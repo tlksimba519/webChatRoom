@@ -1,0 +1,28 @@
+html{
+	background-image:url("/obj/sea.jpg");
+	background-size: cover;
+    height: 100%;
+    overflow: hidden;
+}
+#top{
+	height:100px;
+}
+#history{
+	margin:0px auto;
+	overflow:auto;
+	
+}
+table,tr,td{
+	background-color:white;
+	margin:0px auto;
+	border:1px solid black;
+	text-align:left;
+}
+th{
+	text-align:center;
+}
+@media screen and (max-width: 480px) {
+	#top{
+		height:20px;
+	}
+}
