@@ -71,7 +71,6 @@ public class MainController {
 	
 		Connection conn = dm.getConnetion();
 		status = dm.login(d,conn);
-		dm.logout(conn);
 		
 		if(status) {
 			
@@ -98,10 +97,7 @@ public class MainController {
 	@GetMapping("/getHistory")
 	public @ResponseBody Map<String, Object> history() throws SQLException {
 		
-		Connection conn = dm.getConnetion();
-		dm.login(d,conn);
 		Map<String, Object> result = dm.load();
-		dm.logout(conn);
 		
 		return result;
 		
@@ -134,10 +130,7 @@ public class MainController {
     @MessageMapping("/chat")
     @SendTo("/topic/public")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) throws SQLException {
-    	
-    	Connection conn = dm.getConnetion();
-		dm.login(d,conn);
-		
+    			
 		if(chatMessage.getFileName()!=null) {
 			
 			dm.storage(chatMessage.getSender(),chatMessage.getFilePath(),"file");
@@ -148,7 +141,6 @@ public class MainController {
 			
 		}
 		
-		dm.logout(conn);
     	return chatMessage; // 返回時會將訊息送至/topic/public
     
     }
