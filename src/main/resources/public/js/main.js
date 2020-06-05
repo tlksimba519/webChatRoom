@@ -58,6 +58,8 @@ function onConnected() {
     }))
 
     connectingElement.classList.add('hidden');
+    $("#loginSuccess")[0].play();
+    
 }
 
 function onError(error) {
@@ -194,6 +196,7 @@ function onMessageReceived(payload) {
     messageArea.scrollTop = messageArea.scrollHeight;
     
     $("#sending").addClass("hidden");
+    $("#messageReceived")[0].play();
     
 }
 
