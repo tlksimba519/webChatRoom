@@ -23,6 +23,7 @@ public class DatabaseModel {
 	private static final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
 	private static final String saveFile = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
 	private static final String loadMSG = "SELECT * FROM history ORDER BY TIME ASC";
+	private static final String loadUser = "SELECT USERNAME FROM ChatMemberAccount";
 	public static Connection conn;
 
 	/*
@@ -200,6 +201,27 @@ public class DatabaseModel {
 			}
 			
 			result.put(Integer.toString(index),temp.toArray());
+			
+			index++;
+			
+		}
+		
+		return result;
+		
+	}
+	
+	public static Map<String, Object> getUser() throws SQLException {
+		
+		Map<String, Object> result = new HashMap();
+		
+		PreparedStatement ps = conn.prepareStatement(loadUser);
+		ResultSet rs = ps.executeQuery();
+		int index = 1;
+		
+		while(rs.next()) {
+			
+
+			result.put(Integer.toString(index),rs.getString(1));
 			
 			index++;
 			

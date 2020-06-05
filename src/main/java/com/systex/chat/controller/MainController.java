@@ -107,6 +107,20 @@ public class MainController {
 		
 	}
 	
+	@GetMapping("/getUser")
+	public @ResponseBody Map<String, Object> userData() throws SQLException {
+		
+		Connection conn = dm.getConnetion();
+		d.setID("sa");
+		d.setPasswd("systex.6214");
+		dm.login(d,conn);
+		Map<String, Object> result = dm.getUser();
+		dm.logout(conn);
+		
+		return result;
+		
+	}
+	
 	@MessageMapping("/join")
     @SendTo("/topic/public")
     public ChatMessage addUser(@Payload ChatMessage chatMessage, 
