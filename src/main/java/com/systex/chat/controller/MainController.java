@@ -82,7 +82,7 @@ public class MainController {
 		
 		else {
 				
-			response.sendRedirect("/error.html");
+			response.sendRedirect("/fail.html");
 				
 		}
 
