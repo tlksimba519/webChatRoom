@@ -26,16 +26,45 @@ $(document).ready(function(){
 	
 });
 $("#signup").validate({
-	  rules: {
-	    UserName: {
-	    	required :true,
-	    	alreadyUsed :true
-	    },
-	    Password: "required",
-	    PasswordTwice:{
-	    	equalTo :"#Password"
-	    }
-	  }
+
+	rules: {
+
+		UserName: {
+
+			required :true,
+			alreadyUsed :true
+
+		},
+
+		Password: "required",
+
+		PasswordTwice:{
+
+			equalTo :"#Password"
+
+		}
+
+	},
+
+	messages:{
+
+		UserName:{
+
+			required : "必填"
+
+		},
+
+		Password: "必填",
+
+		PasswordTwice:{
+			
+			required : "必填",
+			equalTo : "密碼不一致",
+
+		},
+
+	},
+
 });
 jQuery.validator.addMethod("alreadyUsed", function(value, element) 
 		{
@@ -49,4 +78,4 @@ jQuery.validator.addMethod("alreadyUsed", function(value, element)
 		        return false;
 		    }
 
-		},"Username is already used. Sorry.");
+		},"此名稱已被使用");
