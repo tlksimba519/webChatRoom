@@ -1,16 +1,20 @@
-body{
+html{
 	background-image:url("/obj/sea.jpg");
 	background-size: cover;
+    height: 100%;
+    overflow: hidden;
 }
 .column{
 	flex:0 0 33.333333%;
 	max-width:33.333333%;
 }
 .flex-container {
+  margin-top: calc(25% - 160px);
   display: flex;
   flex-direction:row;
   justify-content: flex-start;
   align-items: flex-start;
+  
 }
 .login-button{
 	padding: 1% 4% 2% 4%;
@@ -36,4 +40,8 @@ body{
     border: 0;
     padding-left: 8pt;
     width: 40%;
+}
+.error {
+  color: red;
+  margin-left: 5px;
 }

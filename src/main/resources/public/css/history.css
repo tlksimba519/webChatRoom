@@ -8,11 +8,18 @@ html{
 	height:100px;
 }
 #history{
+	height:600px;
+	width:800px;
 	margin:0px auto;
 	overflow:auto;
 	
 }
+a{
+	margin-left:80px;
+}
 table,tr,td{
+	table-layout : fixed;
+	word-wrap : break-word;
 	background-color:white;
 	margin:0px auto;
 	border:1px solid black;
@@ -21,8 +28,14 @@ table,tr,td{
 th{
 	text-align:center;
 }
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 800px) {
 	#top{
 		height:20px;
+	}
+	#history{
+		width:480px;
+	}
+	table{
+		width:480px;
 	}
 }
