@@ -1,7 +1,6 @@
 package com.systex.chat.controller;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -14,12 +13,12 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.systex.chat.database.ConnectionObject;
 import com.systex.chat.database.Database;
 import com.systex.chat.database.DatabaseModel;
 import com.systex.chat.file.file;
@@ -27,23 +26,28 @@ import com.systex.chat.message.ChatMessage;
 
 @Controller
 public class MainController {
-
+	
 	@Autowired
-	Database d;
-	DatabaseModel dm;
+	DatabaseModel databaseModel;
+	
+	@Autowired
+	Database databaseBean;
+	@Autowired
 	file f;
+	@Autowired
+	ConnectionObject conn;
 	
 	@PostMapping("/signup")
 	public void signup(@RequestParam String UserName,@RequestParam String Password,HttpServletRequest request,HttpServletResponse response) throws SQLException, IOException {
 
 		boolean status;
 		
-		d.setID(UserName);
-		d.setPasswd(Password);
-	
-		Connection conn = dm.getConnetion();
-		status = dm.signup(d,conn);
-		dm.logout(conn);
+		databaseBean.setID(UserName);
+		databaseBean.setPasswd(Password);
+		
+		conn.setConn(databaseModel.getConnetion());
+		status = databaseModel.signup(databaseBean,conn.getConn());
+		databaseModel.logout(conn.getConn());
 		
 		if(status) {
 			
@@ -61,20 +65,17 @@ public class MainController {
 	
 	@PostMapping("/login")
 	public void login(@RequestParam String UserName,@RequestParam String Password,HttpServletRequest request,HttpServletResponse response) throws SQLException, IOException {
-		//request.getSession().setAttribute("dbUser",request.getParameter("UserName"));
-		//request.getSession().setAttribute("dbPasswd",request.getParameter("Password"));
 
 		boolean status;
 		
-		d.setID(UserName);
-		d.setPasswd(Password);
-	
-		Connection conn = dm.getConnetion();
-		status = dm.login(d,conn);
+		databaseBean.setID(UserName);
+		databaseBean.setPasswd(Password);
+		conn.setConn(databaseModel.getConnetion());
+		
+		status = databaseModel.login(databaseBean,conn.getConn());
 		
 		if(status) {
 			
-			request.getSession().setAttribute("isLogin",UserName);
 			response.sendRedirect("/main.html");
 			
 		}
@@ -94,24 +95,10 @@ public class MainController {
 	
 	}
 	
-	@GetMapping("/getHistory")
+	@PostMapping("/getHistory")
 	public @ResponseBody Map<String, Object> history() throws SQLException {
 		
-		Map<String, Object> result = dm.load();
-		
-		return result;
-		
-	}
-	
-	@GetMapping("/getUser")
-	public @ResponseBody Map<String, Object> userData() throws SQLException {
-		
-		Connection conn = dm.getConnetion();
-		d.setID("sa");
-		d.setPasswd("systex.6214");
-		dm.login(d,conn);
-		Map<String, Object> result = dm.getUser();
-		dm.logout(conn);
+		Map<String, Object> result = databaseModel.load(conn.getConn());
 		
 		return result;
 		
@@ -133,11 +120,11 @@ public class MainController {
     			
 		if(chatMessage.getFileName()!=null) {
 			
-			dm.storage(chatMessage.getSender(),chatMessage.getFilePath(),"file");
+			databaseModel.storage(chatMessage.getSender(),chatMessage.getFilePath(),"file",conn.getConn());
 			
 		} else {
 			
-			dm.storage(chatMessage.getSender(),chatMessage.getContent(),"text");
+			databaseModel.storage(chatMessage.getSender(),chatMessage.getContent(),"text",conn.getConn());
 			
 		}
 		

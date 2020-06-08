@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class file {
 	
-	public static void save(String username,MultipartFile file) {
+	public  void save(String username,MultipartFile file) {
 		byte[] buffer = new byte[1024];
 		try {
 			InputStream input = file.getInputStream();
@@ -27,8 +27,11 @@ public class file {
             input.close();
             output.close();
             TimeUnit.SECONDS.sleep(3);
+            
 		} catch (Exception e ) {
+			
 			e.printStackTrace();
+			
 		}
 	}
 	

@@ -5,11 +5,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class Database {
 	
-	
 	private String id;
 	private String password;
-	private String target;
-	
 	
 	public String getID(){
 		
@@ -32,18 +29,6 @@ public class Database {
 	public void setPasswd(String password) {
 		
 		this.password = password;
-		
-	}
-	
-	public String getTarget() {
-		
-		return target;
-		
-	}
-	
-	public void setTarget(String target) {
-		
-		this.target = target;
 		
 	}
 	

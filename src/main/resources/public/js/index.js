@@ -1,6 +1,6 @@
 $("form").submit(function(){
 	
-	$.cookie("username",$("#name").val());
+	sessionStorage.setItem("username", $("#name").val());
 
 });
 

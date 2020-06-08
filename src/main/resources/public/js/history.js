@@ -3,7 +3,7 @@ $(document).ready(function(){
 	
 	$.ajax({
 		
-		  type : "GET",
+		  type : "POST",
 		  url : "/getHistory",
 		  dataType: "json",
 		  async:false,

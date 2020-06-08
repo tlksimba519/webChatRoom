@@ -1,30 +1,3 @@
-var temp = [];
-
-$(document).ready(function(){
-	
-	$.ajax({
-		
-		  type : "GET",
-		  url : "/getUser",
-		  dataType: "json",
-		  complete : function(response){
-			  
-			  var data = response.responseJSON;
-			  
-			  for(var i=1;i<=Object.keys(data).length;i++){
-				  
-				  temp.push(data[i.toString()]);
-				  
-			  }
-			  
-		  },
-		  error : function(){
-			  alert("無法取得會員資料，請稍後再試!");
-		  },
-		  
-	});
-	
-});
 $("#signup").validate({
 
 	rules: {
@@ -32,7 +5,6 @@ $("#signup").validate({
 		UserName: {
 
 			required :true,
-			alreadyUsed :true
 
 		},
 
@@ -66,16 +38,3 @@ $("#signup").validate({
 	},
 
 });
-jQuery.validator.addMethod("alreadyUsed", function(value, element) 
-		{
-		    value  = $.trim(value);
-		    if(temp.indexOf(value)==-1)
-		    {
-		       return true;
-		    }
-		    else
-		    {
-		        return false;
-		    }
-
-		},"此名稱已被使用");

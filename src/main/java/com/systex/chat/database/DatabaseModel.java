@@ -15,33 +15,31 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseModel {
-	
-	private static final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	private static final String accountTable = "ChatMemberAccount";
-	private static final String dbInfo = "jdbc:sqlserver://10.10.56.198:1433;"+
-			"databaseName=exercise_db;user=sa;password=systex.6214";
-	private static final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
-	private static final String saveFile = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
-	private static final String loadMSG = "SELECT * FROM history ORDER BY TIME ASC";
-	private static final String loadUser = "SELECT USERNAME FROM ChatMemberAccount";
-	public static Connection conn;
 
+	private  final String accountTable = "chatmemberaccount";
+	private  final String dbInfo = "jdbc:mysql://localhost:3306/mysql?serverTimezone=UTC";
+	private  final String dbUser = "root";
+	private  final String dbPassword = "Leo0826519";
+	private  final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
+	private  final String saveFile = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
+	private  final String loadMSG = "SELECT * FROM history ORDER BY TIME ASC";
+	
 	/*
 	 * 獲得Connection物件
 	 */
-	public static Connection getConnetion() throws SQLException {
+	public Connection getConnetion(){
+
+		Connection conn = null;
 		
 		try {
-			
-			Class.forName(driver);
-			conn = DriverManager.getConnection(dbInfo);
+
+			conn = DriverManager.getConnection(dbInfo,dbUser,dbPassword);
+
 			
 		} catch (Exception e) {
 			
 			System.out.println("找不到驅動程式類別");
 			e.printStackTrace();
-			conn.close();
-			System.exit(0);
 			
 		}
 		
@@ -52,7 +50,7 @@ public class DatabaseModel {
 	/*
 	 * 註冊
 	 */
-	public static boolean signup(Database d,Connection conn) throws SQLException {
+	public  boolean signup(Database d,Connection conn) throws SQLException {
 
 		boolean status = false;
 		
@@ -80,7 +78,7 @@ public class DatabaseModel {
 	/*
 	 * 登入
 	 */
-	public static boolean login(Database d,Connection conn) throws SQLException {
+	public  boolean login(Database d,Connection conn) throws SQLException {
 		
 		boolean status = false;
 		
@@ -95,7 +93,6 @@ public class DatabaseModel {
 		} catch (Exception e) {
 
 			e.printStackTrace();
-			conn.close();
 			System.exit(0);
 			
 		}
@@ -107,7 +104,7 @@ public class DatabaseModel {
 	/*
 	 * 登出
 	 */
-	public static void logout(Connection conn) throws SQLException {
+	public  void logout(Connection conn) throws SQLException {
 
 		conn.close();
 
@@ -116,7 +113,7 @@ public class DatabaseModel {
 	/*
 	 * MD5加密
 	 */
-	public static String hash(String Unencrypt) {
+	public  String hash(String Unencrypt) {
 		String encrypted = null;
 		try {
 			
@@ -147,7 +144,7 @@ public class DatabaseModel {
 	/*
 	 * 儲存歷史訊息
 	 */
-	public static void storage(String user,String content,String type) throws SQLException {
+	public  void storage(String user,String content,String type,Connection conn) throws SQLException {
 		
 		String cmd = null;
 		
@@ -173,7 +170,7 @@ public class DatabaseModel {
 	/*
 	 * 讀取歷史訊息
 	 */
-	public static Map<String, Object> load() throws SQLException {
+	public  Map<String, Object> load(Connection conn) throws SQLException {
 		
 		int index = 1;
 		Map<String, Object> result = new HashMap();
@@ -201,27 +198,6 @@ public class DatabaseModel {
 			}
 			
 			result.put(Integer.toString(index),temp.toArray());
-			
-			index++;
-			
-		}
-		
-		return result;
-		
-	}
-	
-	public static Map<String, Object> getUser() throws SQLException {
-		
-		Map<String, Object> result = new HashMap();
-		
-		PreparedStatement ps = conn.prepareStatement(loadUser);
-		ResultSet rs = ps.executeQuery();
-		int index = 1;
-		
-		while(rs.next()) {
-			
-
-			result.put(Integer.toString(index),rs.getString(1));
 			
 			index++;
 			

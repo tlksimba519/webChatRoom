@@ -244,7 +244,7 @@ messageForm.addEventListener('submit', sendMessage, true)
 
 $(document).ready(function(){
 	
-	username = $.cookie('username');
+	username = sessionStorage.getItem("username");
 	connect();
 	
 })
