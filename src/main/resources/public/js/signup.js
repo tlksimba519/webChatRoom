@@ -1,3 +1,6 @@
+/*
+ * 註冊表單欄位驗證
+ */
 $("#signup").validate({
 
 	rules: {

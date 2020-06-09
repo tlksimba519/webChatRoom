@@ -18,24 +18,28 @@ var fileName = null;
 var fileType = null;
 
 /**
- * 頭像顏色
+ * 頭像顏色表
  */
 var colors = [ '#2196F3', '#32c787', '#00bcd4','#4dbb00', '#ff5652', '#ffc107',
         '#ff85af', '#ff9800', '#39bbb0', '#b0c503' ];
 
 /**
- * 連線
+ * 連線function
+ * 描述 : 確認當前使用者名稱是否存在，若有則顯示主畫面
  */
 function connect(event) {
 
-    if (username) {
+    if (username!=null) {
 
+    	//顯示聊天室
         chatPage.classList.remove('hidden');
-
+        
+        //建立sockJS to STOMP
         var socket = new SockJS('/chatroom');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, onConnected, onError);
+        
     }
 
     event.preventDefault();
@@ -43,25 +47,30 @@ function connect(event) {
 }
 
 /**
- * 連線成功後，訂閱頻道及傳接訊息設定
+ * 連線建立後callback function
+ * 描述 : 連線建立後訂閱channel，並廣播使用者上線通知
  */
 function onConnected() {
-    // 訂閱/topic/public
-    stompClient.subscribe('/topic/public', onMessageReceived); // 訂閱成功後 callback onMessageReceived()。
+    //訂閱/topic/public
+    stompClient.subscribe('/topic/public', onMessageReceived); //訂閱成功後 callback onMessageReceived()。
 
-    // 發送加入訊息至/app/join，也就是送到Controller.addUser()
+    //發送加入訊息至/app/join，也就是送到Controller.addUser()
     stompClient.send("/app/join", {}, JSON.stringify({
     	
         sender : username,
         type : 'JOIN'
         	
     }))
-
+    //關閉 "connecting.."
     connectingElement.classList.add('hidden');
+    //播放登入音效
     $("#loginSuccess")[0].play();
     
 }
 
+/*
+ * 連線建立失敗 callback function
+ */
 function onError(error) {
 	
     connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
@@ -70,7 +79,8 @@ function onError(error) {
 }
 
 /**
- * 發送訊息
+ * 發送訊息 function
+ * 描述 : 
  */
 function sendMessage(event) {
 	
@@ -121,25 +131,26 @@ function sendMessage(event) {
 }
 
 /**
- * 接受訊息後廣播
+ * 收到訊息後處理 function
  */
 function onMessageReceived(payload) {
 	
     var message = JSON.parse(payload.body);
-
+    //使用<li>tag加入messageArea
     var messageElement = document.createElement('li');
     
     //分類為事件訊息及聊天訊息
     if (message.type === 'JOIN') {
     	
         messageElement.classList.add('event-message');
-        message.content = message.sender + ' 加入聊天室';
+        message.content = message.sender + ' 上線囉';
         
     } else if (message.type === 'LEAVE') {
     	
         messageElement.classList.add('event-message');
-        message.content = message.sender + ' 離開聊天室';
+        message.content = message.sender + ' 下線囉';
         
+    //訊息排序為頭像->使用者名稱->訊息    
     } else {
     	
         messageElement.classList.add('chat-message');
@@ -180,7 +191,7 @@ function onMessageReceived(payload) {
     	}
     	
     	
-    	
+    //純文字處理	
     } else {
     	
 	    var textElement = document.createElement('p');
@@ -194,8 +205,9 @@ function onMessageReceived(payload) {
 
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;
-    
+    //關閉 "上傳中.."
     $("#sending").addClass("hidden");
+    //播放訊息通知聲
     $("#messageReceived")[0].play();
     
 }
@@ -215,6 +227,7 @@ function getAvatarElement(sender) {
 
 /**
  * 取得頭像顏色
+ * 描述 : 用hash隨機選色
  */
 function getAvatarColor(sender) {
 	
@@ -239,15 +252,20 @@ function getUsernameElement(sender) {
     
 }
 
-//訊息發送
+//訊息發送監聽器
 messageForm.addEventListener('submit', sendMessage, true)
 
-$(document).ready(function(){
+//頁面完成後先做連線
+$(document).ready(function(event){
 	
 	username = sessionStorage.getItem("username");
-	connect();
+	
+	getHistory();
+	
+	connect(event);
 	
 })
+
 //擷取檔案資訊
 $('#file').change(function(e){
 	
@@ -256,9 +274,10 @@ $('#file').change(function(e){
 	fileType = e.target.files[0].type;
 	
 })
+
 //上傳檔案
 $('#sendFile').click(function(){
-	
+	//防呆
 	if(!file){
 		
 		alert("請選擇檔案再上傳");
@@ -276,6 +295,7 @@ $('#sendFile').click(function(){
 			  cache: false,
 			  processData: false,
 			  contentType: false,
+			  async: false,
 			  data : form,
 			  beforeSend : function(){
 				  

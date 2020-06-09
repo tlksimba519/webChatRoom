@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class WebChatRoomApplication {
 
 	public static void main(String[] args) {
+		
 		SpringApplication.run(WebChatRoomApplication.class, args);
+		
 	}
 
 }

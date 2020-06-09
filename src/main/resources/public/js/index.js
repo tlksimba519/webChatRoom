@@ -1,9 +1,15 @@
+/*
+ * 表單送出後存下使用者名稱
+ */
 $("form").submit(function(){
 	
 	sessionStorage.setItem("username", $("#name").val());
 
 });
 
+/*
+ * 登入表單欄位驗證
+ */
 $("#login").validate({
 	
 	rules: {

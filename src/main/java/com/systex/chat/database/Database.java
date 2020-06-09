@@ -2,6 +2,9 @@ package com.systex.chat.database;
 
 import org.springframework.stereotype.Component;
 
+/*
+ * database物件class，用於載入使用者帳號密碼
+ */
 @Component
 public class Database {
 	

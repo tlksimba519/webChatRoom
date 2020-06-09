@@ -13,6 +13,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry endpointRegistry) {
         
+    	//註冊一個Client to Server的路由節點
         endpointRegistry.addEndpoint("/chatroom").withSockJS(); 
     
     }
@@ -20,8 +21,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry brokerRegister) {
         
+    	//啟用一個訊息代理並設定路由前綴
         brokerRegister.enableSimpleBroker("/topic");
         
+        //設定訊息發送給Controller的路由前綴
         brokerRegister.setApplicationDestinationPrefixes("/app");
     
     }

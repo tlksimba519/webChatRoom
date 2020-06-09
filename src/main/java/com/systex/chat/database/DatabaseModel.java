@@ -2,7 +2,6 @@ package com.systex.chat.database;
 
 import java.security.MessageDigest;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -13,87 +12,88 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 
+/*
+ * 資料庫model
+ */
 @Component
 public class DatabaseModel {
 
 	private  final String accountTable = "chatmemberaccount";
-	private  final String dbInfo = "jdbc:mysql://localhost:3306/mysql?serverTimezone=UTC";
-	private  final String dbUser = "root";
-	private  final String dbPassword = "Leo0826519";
 	private  final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
 	private  final String saveFile = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
 	private  final String loadMSG = "SELECT * FROM history ORDER BY TIME ASC";
 	
 	/*
-	 * 獲得Connection物件
+	 * 註冊功能
+	 * 描述 : 獲取使用者帳號密碼，透過查詢指令確認是否為已註冊帳號，若不是則新增此帳戶資訊至資料庫
 	 */
-	public Connection getConnetion(){
+	public String signup(Database d,Connection conn) throws SQLException {
 
-		Connection conn = null;
-		
-		try {
-
-			conn = DriverManager.getConnection(dbInfo,dbUser,dbPassword);
-
-			
-		} catch (Exception e) {
-			
-			System.out.println("找不到驅動程式類別");
-			e.printStackTrace();
-			
-		}
-		
-		return conn;
-		
-	}
-	
-	/*
-	 * 註冊
-	 */
-	public  boolean signup(Database d,Connection conn) throws SQLException {
-
-		boolean status = false;
+		String status = "";
 		
 		try {
 			
-			String sql = "INSERT INTO " + accountTable + "(USERNAME,PASSWORD) VALUES (?,?)";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, d.getID());
-			ps.setString(2, hash(d.getPasswd()));
-			ps.executeUpdate();
-			status = true;
-
-		} catch (Exception e) {
+			String checkSQL = "SELECT * FROM " + accountTable + " WHERE USERNAME = '"
+					+ d.getID()+ "'";
+			String signupSQL = "INSERT INTO " + accountTable + "(USERNAME,PASSWORD) VALUES (?,?)";
 			
-			e.printStackTrace();
-			conn.close();
-			System.exit(0);
-			
-		}
-
-		return status;
-		
-	}
-	
-	/*
-	 * 登入
-	 */
-	public  boolean login(Database d,Connection conn) throws SQLException {
-		
-		boolean status = false;
-		
-		try {
-			
-			String sql = "SELECT * FROM " + accountTable+ " WHERE USERNAME = '"+d.getID()+"' AND PASSWORD = '"+hash(d.getPasswd())+"'";
-			PreparedStatement ps = conn.prepareStatement(sql);
+			PreparedStatement ps = conn.prepareStatement(checkSQL);
 			ResultSet rs = ps.executeQuery();
 			
-			if(rs.next()) status = true;
+			if(rs.next()) {
+				
+				status = "used";
+				
+			} else {
+				
+				ps = conn.prepareStatement(signupSQL);
+				ps.setString(1, d.getID());
+				ps.setString(2, hash(d.getPasswd()));
+				ps.executeUpdate();
+				status = "success";
+				
+			}
+
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			status = "fail";
+			
+		}
+
+		return status;
+		
+	}
+	
+	/*
+	 * 登入功能
+	 * 描述 : 獲取使用者帳號密碼，比對是否為會員。
+	 */
+	public String login(Database d,Connection conn) throws SQLException {
+		
+		String status = "";
+		
+		try {
+			
+			String loginSQL = "SELECT * FROM " + accountTable+ " WHERE USERNAME = '" + d.getID()
+				+ "' AND PASSWORD = '"+hash(d.getPasswd())+"'";
+			PreparedStatement ps = conn.prepareStatement(loginSQL);
+			ResultSet rs = ps.executeQuery();
+			
+			if(rs.next()) {
+				
+				status = "success";
+				
+			} else {
+				
+				status = "wrong";
+				
+			}
 			
 		} catch (Exception e) {
 
 			e.printStackTrace();
-			System.exit(0);
+			status = "fail";
 			
 		}
 		
@@ -102,9 +102,10 @@ public class DatabaseModel {
 	}
 	
 	/*
-	 * 登出
+	 * 登出功能
+	 * 描述 : 註冊功能為暫時連線需求，註冊完畢即先釋放connection物件
 	 */
-	public  void logout(Connection conn) throws SQLException {
+	public void logout(Connection conn) throws SQLException {
 
 		conn.close();
 
@@ -112,8 +113,9 @@ public class DatabaseModel {
 	
 	/*
 	 * MD5加密
+	 * 描述 : 對密碼進行MD5加密，避免直接使用明文存至資料庫
 	 */
-	public  String hash(String Unencrypt) {
+	public String hash(String Unencrypt) {
 		String encrypted = null;
 		try {
 			
@@ -142,9 +144,10 @@ public class DatabaseModel {
 	}
 	
 	/*
-	 * 儲存歷史訊息
+	 * 儲存訊息
+	 * 描述 : 透過獲得訊息類型判斷來切換不同指令儲存訊息
 	 */
-	public  void storage(String user,String content,String type,Connection conn) throws SQLException {
+	public void messageStorage(String user,String content,String type,Connection conn) throws SQLException {
 		
 		String cmd = null;
 		
@@ -168,12 +171,13 @@ public class DatabaseModel {
 	}
 	
 	/*
-	 * 讀取歷史訊息
+	 * 讀取訊息
+	 * 描述 : 使用查詢指令按時間排序後包裝成Map回傳給controller轉換成json。
 	 */
-	public  Map<String, Object> load(Connection conn) throws SQLException {
+	public Map<String, Object> messageLoad(Connection conn) throws SQLException {
 		
 		int index = 1;
-		Map<String, Object> result = new HashMap();
+		Map<String, Object> result = new HashMap<String, Object>();
 		ArrayList<String>temp = new ArrayList<String>();
 		
 		PreparedStatement ps = conn.prepareStatement(loadMSG);
