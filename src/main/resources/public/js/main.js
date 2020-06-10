@@ -11,11 +11,21 @@ var connectingElement = document.querySelector('.connecting');
 var nameInput = document.querySelector('#name');
 var fileInput = document.querySelector('#file');
 
+/*
+ * 初始化變數
+ */
+// 建立STOMP物件
 var stompClient = null;
+// 儲存使用者名稱
 var username = null;
-var file = null;
-var fileName = null;
-var fileType = null;
+// 儲存檔案參數
+var uploadFileObject = null;
+var uploadFileName = null;
+var uploadFileType = null;
+// 歷史紀錄實現lazy loading使用變數
+var lazyLoadRangeMin = 0;
+var lazyLoadRangeMax = 0;
+var historyMessageLength = 0;
 
 /**
  * 頭像顏色表
@@ -89,14 +99,14 @@ function sendMessage(event) {
     if (stompClient) {
     	
     	//傳檔案
-	    if(fileName&&!messageContent){
+	    if(uploadFileName&&!messageContent){
 	    	
 	    	var chatMessage = {
 	    			
 	                sender : username,
-	                fileName : fileName,
-	                filePath : "file/"+username+"_"+fileName,
-	                fileType : fileType,
+	                fileName : uploadFileName,
+	                filePath : "file/"+username+"_"+uploadFileName,
+	                fileType : uploadFileType,
 	                type : 'FILE'
 	                	
 	        };
@@ -105,6 +115,7 @@ function sendMessage(event) {
 	    }else if(!messageContent){
 	    	
 	    	event.preventDefault();
+	    	return;
 	    	
 	    //傳訊息
 	    }else {
@@ -136,10 +147,10 @@ function sendMessage(event) {
 function onMessageReceived(payload) {
 	
     var message = JSON.parse(payload.body);
-    //使用<li>tag加入messageArea
+    // 使用<li>tag加入messageArea
     var messageElement = document.createElement('li');
     
-    //分類為事件訊息及聊天訊息
+    // 分類為事件訊息及聊天訊息
     if (message.type === 'JOIN') {
     	
         messageElement.classList.add('event-message');
@@ -150,7 +161,7 @@ function onMessageReceived(payload) {
         messageElement.classList.add('event-message');
         message.content = message.sender + ' 下線囉';
         
-    //訊息排序為頭像->使用者名稱->訊息    
+    // 訊息排序為頭像->使用者名稱->訊息    
     } else {
     	
         messageElement.classList.add('chat-message');
@@ -163,9 +174,10 @@ function onMessageReceived(payload) {
         
     }
     
-    //檔案處理，如果為圖片會做預覽處理
+    // 檔案處理，如果為圖片會做預覽處理
     if(message.type === 'FILE'){
     	
+    	// 製作超連結
     	var textElement = document.createElement('a');
     	var download = document.createAttribute("download");
     	var href = document.createAttribute("href");
@@ -173,7 +185,7 @@ function onMessageReceived(payload) {
     	textElement.setAttributeNode(href);
     	textElement.setAttributeNode(download);
     	
-    	
+    	// 若目標為圖片則製作圖片超連結供預覽
     	if(message.fileType.search("image")!=-1){
     		
 	    	var image = document.createElement('img');
@@ -191,7 +203,7 @@ function onMessageReceived(payload) {
     	}
     	
     	
-    //純文字處理	
+    // 純文字處理	
     } else {
     	
 	    var textElement = document.createElement('p');
@@ -205,9 +217,9 @@ function onMessageReceived(payload) {
 
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;
-    //關閉 "上傳中.."
+    // 關閉 "上傳中.."
     $("#sending").addClass("hidden");
-    //播放訊息通知聲
+    // 播放訊息通知聲
     $("#messageReceived")[0].play();
     
 }
@@ -252,40 +264,68 @@ function getUsernameElement(sender) {
     
 }
 
-//訊息發送監聽器
-messageForm.addEventListener('submit', sendMessage, true)
+/**
+ * 載入歷史訊息，
+ */
+function loadHistory(){
+	
+	if(messageArea.scrollTop<110){
+		
+		if(lazyLoadRangeMin<0){
+			
+			lazyLoadRangeMin = 0;
+			
+		}
+		
+		$("#messageArea li").slice(lazyLoadRangeMin,lazyLoadRangeMax).fadeIn(1200);
+		lazyLoadRangeMax = lazyLoadRangeMax-5;
+		lazyLoadRangeMin = lazyLoadRangeMin-5;
+		
+	}
+	
+}
 
-//頁面完成後先做連線
+// 訊息發送監聽器
+messageForm.addEventListener('submit', sendMessage, true)
+messageArea.addEventListener('scroll', loadHistory, true)
+
+// 頁面完成後先做連線
 $(document).ready(function(event){
 	
+	// 取得使用者名稱
 	username = sessionStorage.getItem("username");
 	
-	getHistory();
+	// 進行歷史紀錄提取
+	historyMessageLength = getHistory();
+	lazyLoadRangeMax = historyMessageLength-5;
+	lazyLoadRangeMin = historyMessageLength-10;
 	
+	// 進行 websocket 連線
 	connect(event);
 	
 })
 
-//擷取檔案資訊
+// 擷取檔案資訊
 $('#file').change(function(e){
 	
-	file = e.target.files[0];
-	fileName = e.target.files[0].name;
-	fileType = e.target.files[0].type;
+	uploadFileObject = e.target.files[0];
+	uploadFileName = e.target.files[0].name;
+	uploadFileType = e.target.files[0].type;
 	
 })
 
-//上傳檔案
+// 上傳檔案
 $('#sendFile').click(function(){
-	//防呆
-	if(!file){
+	
+	// 防呆
+	if(uploadFileObject==null){
 		
 		alert("請選擇檔案再上傳");
 		
 	} else {
 		
 		let form = new FormData();
-		form.append("file", file);
+		form.append("file", uploadFileObject);
 		form.append("username",username);
 		
 		$.ajax({
@@ -298,7 +338,7 @@ $('#sendFile').click(function(){
 			  async: false,
 			  data : form,
 			  beforeSend : function(){
-				  
+				// 開啟 "上傳中.."  
 				$("#sending").removeClass("hidden");
 				
 			  },
@@ -312,6 +352,11 @@ $('#sendFile').click(function(){
 			  },
 			  
 		});
+		
+		// 清除檔案資訊
+		uploadFileObject = null;
+		uploadFileName = null;
+		uploadFileType = null;
 		
 	}
 	
