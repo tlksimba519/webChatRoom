@@ -11,7 +11,7 @@ public class Database {
 	private String id;
 	private String password;
 	
-	public String getID(){
+	public String getID() {
 		
 		return id;
 		

@@ -7,7 +7,7 @@ $("#signup").validate({
 
 		UserName : {
 
-			required : true,
+			required : true
 
 		},
 
@@ -34,7 +34,7 @@ $("#signup").validate({
 		PasswordTwice : {
 			
 			required : "必填",
-			equalTo : "密碼不一致",
+			equalTo : "密碼不一致"
 
 		},
 

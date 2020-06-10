@@ -1,6 +1,8 @@
 html{
-	background-image:url("/obj/sea.jpg");
-	background-size: cover;
-    height: 100%;
-    overflow: hidden;
+	
+	background-image : url("/obj/sea.jpg");
+	background-size : cover;
+    height : 100%;
+    overflow : hidden;
+    
 }

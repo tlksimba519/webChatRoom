@@ -3,7 +3,6 @@ package com.systex.chat.file;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,14 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class file {
 	
-	public void saveFile(String username,MultipartFile file) {
+	public void saveFile(String username, MultipartFile file) {
 		
 		byte[] buffer = new byte[1024];
 		
 		try {
 			
 			InputStream input = file.getInputStream();
-			FileOutputStream output = new FileOutputStream(new File("src/main/resources/public/file/"+username+"_"+file.getOriginalFilename()));
+			FileOutputStream output = new FileOutputStream(new File("src/main/resources/public/file/" + username + "_" + file.getOriginalFilename()));
 			int length = -1;
 			
             // 從來源檔案讀取資料至緩衝區 
@@ -35,7 +34,7 @@ public class file {
             input.close();
             output.close();
             
-		} catch (Exception e ) {
+		} catch (Exception e) {
 			
 			e.printStackTrace();
 			

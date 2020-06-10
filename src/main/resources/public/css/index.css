@@ -1,41 +1,54 @@
 .column{
-	flex:0 0 33.333333%;
-	max-width:33.333333%;
+	
+	flex : 0 0 33.333333%;
+	max-width : 33.333333%;
+	
 }
 .flex-container {
-  margin-top: calc(25% - 160px);
-  display: flex;
-  flex-direction:row;
-  justify-content: flex-start;
-  align-items: flex-start;
+	
+  margin-top : calc(25% - 160px);
+  display : flex;
+  flex-direction : row;
+  justify-content : flex-start;
+  align-items : flex-start;
   
 }
 .login-button{
-	padding: 1% 4% 2% 4%;
-    background-color: rgb(95,158,160,0.65);
-    border: none;
-    border-radius: 10px;
-    font-size: 20pt;
-    font-weight: bold;
+	
+	padding : 1% 4% 2% 4%;
+    background-color:  rgb(95,158,160,0.65);
+    border : none;
+    border-radius : 10px;
+    font-size : 20pt;
+    font-weight : bold;
+    
 }
 .content{
-	background: rgba(123,123,123, 0.7);
-    text-align: center;
-    padding-top: 2%;
-    border-radius: 20px;
+	
+	background : rgba(123,123,123, 0.7);
+    text-align : center;
+    padding-top : 2%;
+    border-radius : 20px;
+    
 }
 .text-in-content{
-	font-size: 18pt;
-    margin-bottom: 8%;
+	
+	font-size : 18pt;
+    margin-bottom : 8%;
+    
 }
 .input-box{
-    font-size: 16pt;
-    background: rgb(255, 255,255, 0.65);
-    border: 0;
-    padding-left: 8pt;
-    width: 40%;
+	
+    font-size : 16pt;
+    background : rgb(255, 255,255, 0.65);
+    border : 0;
+    padding-left : 8pt;
+    width : 40%;
+    
 }
 .error {
-  color: red;
-  margin-left: 5px;
+	
+  color : red;
+  margin-left : 5px;
+  
 }
