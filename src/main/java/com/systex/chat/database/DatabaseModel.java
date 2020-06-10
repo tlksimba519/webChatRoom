@@ -18,10 +18,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseModel {
 
-	private  final String accountTable = "chatmemberaccount";
-	private  final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
-	private  final String saveFile = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
-	private  final String loadMSG = "SELECT * FROM history ORDER BY TIME ASC";
+	private final String accountTable = "chatmemberaccount";
+	private final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
+	private final String saveFile = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
+	private final String loadMSG = "SELECT * FROM history ORDER BY TIME ASC";
 	
 	/*
 	 * 註冊功能
@@ -75,8 +75,8 @@ public class DatabaseModel {
 		
 		try {
 			
-			String loginSQL = "SELECT * FROM " + accountTable+ " WHERE USERNAME = '" + d.getID()
-				+ "' AND PASSWORD = '"+hash(d.getPasswd())+"'";
+			String loginSQL = "SELECT * FROM " + accountTable + " WHERE USERNAME = '" + d.getID()
+				+ "' AND PASSWORD = '" + hash(d.getPasswd()) + "'";
 			PreparedStatement ps = conn.prepareStatement(loginSQL);
 			ResultSet rs = ps.executeQuery();
 			
@@ -116,7 +116,9 @@ public class DatabaseModel {
 	 * 描述 : 對密碼進行MD5加密，避免直接使用明文存至資料庫
 	 */
 	public String hash(String Unencrypt) {
+		
 		String encrypted = null;
+		
 		try {
 			
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -133,7 +135,7 @@ public class DatabaseModel {
 			
 			encrypted = sb.toString();
 		
-		}catch(Exception e) {
+		} catch(Exception e) {
 			
 			e.printStackTrace();
 			
@@ -193,7 +195,7 @@ public class DatabaseModel {
 				
 				if(rs.getString(i).equals("")) {
 					
-				}else {
+				} else {
 					
 					temp.add(rs.getString(i));
 					

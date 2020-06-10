@@ -3,35 +3,35 @@
  */
 $("#signup").validate({
 
-	rules: {
+	rules : {
 
-		UserName: {
+		UserName : {
 
-			required :true,
+			required : true,
 
 		},
 
-		Password: "required",
+		Password : "required",
 
-		PasswordTwice:{
+		PasswordTwice : {
 
-			equalTo :"#Password"
+			equalTo : "#Password"
 
 		}
 
 	},
 
-	messages:{
+	messages : {
 
-		UserName:{
+		UserName : {
 
 			required : "必填"
 
 		},
 
-		Password: "必填",
+		Password : "必填",
 
-		PasswordTwice:{
+		PasswordTwice : {
 			
 			required : "必填",
 			equalTo : "密碼不一致",

@@ -44,14 +44,14 @@ public class MainController {
 	 * 描述 : 從註冊頁獲取使用者帳號及密碼，比對是否為未註冊帳號，註冊完畢即跳轉回登入頁。
 	 */
 	@PostMapping("/signup")
-	public void signup(@RequestParam String UserName,@RequestParam String Password,HttpServletRequest request,HttpServletResponse response) throws SQLException, IOException {
+	public void signup(@RequestParam String UserName, @RequestParam String Password, HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
 
 		String status;
 		
 		databaseBean.setID(UserName);
 		databaseBean.setPasswd(Password);
 		
-		status = databaseModel.signup(databaseBean,conn.getConn());
+		status = databaseModel.signup(databaseBean, conn.getConn());
 		
 		if(status.equals("success")) {
 			
@@ -74,14 +74,14 @@ public class MainController {
 	 * 描述 : 從登入頁獲取使用者帳號及密碼，比對資料庫中是否有對應資料，登入成功後跳轉至聊天室主頁。
 	 */
 	@PostMapping("/login")
-	public void login(@RequestParam String UserName,@RequestParam String Password,HttpServletRequest request,HttpServletResponse response) throws SQLException, IOException {
+	public void login(@RequestParam String UserName, @RequestParam String Password, HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
 
 		String status;
 		
 		databaseBean.setID(UserName);
 		databaseBean.setPasswd(Password);
 		
-		status = databaseModel.login(databaseBean,conn.getConn());
+		status = databaseModel.login(databaseBean, conn.getConn());
 		
 		if(status.equals("success")) {
 			
@@ -106,7 +106,7 @@ public class MainController {
 	 * 描述 : 獲取傳送者及檔案資料，儲存檔案於server端，並且能夠供使用者預覽/存取。
 	 */
 	@PostMapping("/sendFile")
-	public void sendFile(HttpServletResponse response ,@RequestParam String username,@RequestParam MultipartFile file) throws SQLException {
+	public void sendFile(HttpServletResponse response, @RequestParam String username, @RequestParam MultipartFile file) throws SQLException {
 		
 		f.saveFile(username,file);
 	
@@ -151,11 +151,11 @@ public class MainController {
     			
 		if(chatMessage.getFileName()!=null) {
 			
-			databaseModel.messageStorage(chatMessage.getSender(),chatMessage.getFilePath(),"file",conn.getConn());
+			databaseModel.messageStorage(chatMessage.getSender(), chatMessage.getFilePath(), "file", conn.getConn());
 			
 		} else {
 			
-			databaseModel.messageStorage(chatMessage.getSender(),chatMessage.getContent(),"text",conn.getConn());
+			databaseModel.messageStorage(chatMessage.getSender(), chatMessage.getContent(), "text", conn.getConn());
 			
 		}
 		

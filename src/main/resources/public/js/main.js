@@ -39,7 +39,7 @@ var colors = [ '#2196F3', '#32c787', '#00bcd4','#4dbb00', '#ff5652', '#ffc107',
  */
 function connect(event) {
 
-    if (username!=null) {
+    if (username != null) {
 
     	//顯示聊天室
         chatPage.classList.remove('hidden');
@@ -99,26 +99,27 @@ function sendMessage(event) {
     if (stompClient) {
     	
     	//傳檔案
-	    if(uploadFileName&&!messageContent){
+	    if(uploadFileName != null && messageContent == null){
 	    	
 	    	var chatMessage = {
 	    			
 	                sender : username,
 	                fileName : uploadFileName,
-	                filePath : "file/"+username+"_"+uploadFileName,
+	                filePath : "file/" + username + "_" + uploadFileName,
 	                fileType : uploadFileType,
 	                type : 'FILE'
 	                	
 	        };
 	    	
 	    //空字串阻擋
-	    }else if(!messageContent){
+	    } else if(messageContent == null && uploadFileName == null){
 	    	
 	    	event.preventDefault();
+	    	
 	    	return;
 	    	
 	    //傳訊息
-	    }else {
+	    } else {
 	    	
 	    	var chatMessage = {
 	    			
@@ -167,36 +168,41 @@ function onMessageReceived(payload) {
         messageElement.classList.add('chat-message');
 
         var avatarElement = getAvatarElement(message.sender);
+        
         messageElement.appendChild(avatarElement);
 
         var usernameElement = getUsernameElement(message.sender);
+        
         messageElement.appendChild(usernameElement);
         
     }
     
     // 檔案處理，如果為圖片會做預覽處理
-    if(message.type === 'FILE'){
+    if (message.type === 'FILE') {
     	
     	// 製作超連結
     	var textElement = document.createElement('a');
     	var download = document.createAttribute("download");
     	var href = document.createAttribute("href");
-    	href.value=message.filePath;
+    	
+    	href.value = message.filePath;
     	textElement.setAttributeNode(href);
     	textElement.setAttributeNode(download);
     	
     	// 若目標為圖片則製作圖片超連結供預覽
-    	if(message.fileType.search("image")!=-1){
+    	if (message.fileType.search("image") != -1) {
     		
 	    	var image = document.createElement('img');
 	    	var src = document.createAttribute("src");
-	    	src.value=message.filePath;
+	    	
+	    	src.value = message.filePath;
 	    	image.setAttributeNode(src);
+	    	// 設定預覽圖大小
 	    	image.style['width'] = "400px";
 	    	image.style['height'] = "300px";
 	    	textElement.appendChild(image);
 	    	
-    	}else{
+    	} else {
     		
     		textElement.appendChild(document.createTextNode(message.fileName));
     		
@@ -208,13 +214,13 @@ function onMessageReceived(payload) {
     	
 	    var textElement = document.createElement('p');
 	    var messageText = document.createTextNode(message.content);
+	    
 	    textElement.appendChild(messageText);
 	    
     }
     
     messageElement.appendChild(document.createElement('br'));
     messageElement.appendChild(textElement);
-
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;
     // 關閉 "上傳中.."
@@ -226,28 +232,36 @@ function onMessageReceived(payload) {
 
 /**
  * 取得頭像
+ * 描述 : 取使用者名稱第一個字當頭像
  */
 function getAvatarElement(sender) {
 	
     var avatarElement = document.createElement('i');
     var avatarText = document.createTextNode(sender[0]);
+    
     avatarElement.appendChild(avatarText);
     avatarElement.style['background-color'] = getAvatarColor(sender);
+    
     return avatarElement;
     
 }
 
 /**
  * 取得頭像顏色
- * 描述 : 用hash隨機選色
+ * 描述 : 對使用者名稱逐字hash+計算後獲得對應顏色
  */
 function getAvatarColor(sender) {
 	
     var hash = 0;
+    
     for (var i = 0; i < sender.length; i++) {
+    	
         hash = 31 * hash + sender.charCodeAt(i);
+        
     }
+    
     var index = Math.abs(hash % colors.length);
+    
     return colors[index];
     
 }
@@ -259,25 +273,31 @@ function getUsernameElement(sender) {
 	
     var usernameElement = document.createElement('span');
     var usernameText = document.createTextNode(sender);
+    
     usernameElement.appendChild(usernameText);
+    
     return usernameElement;
     
 }
 
 /**
- * 載入歷史訊息，
+ * 載入歷史訊息，實作lazy loading，一次存取五筆紀錄。
  */
-function loadHistory(){
+function loadHistory() {
 	
-	if(messageArea.scrollTop<110){
-		
-		if(lazyLoadRangeMin<0){
+	// scroll值為100  設定大於100多一點時觸發
+	if(messageArea.scrollTop < 110){ 
+		// 最小值為負數代表最後一次存取不足五筆 故縮小範圍
+		if(lazyLoadRangeMin < 0){ 
 			
 			lazyLoadRangeMin = 0;
 			
 		}
 		
+		// 使用fadeIn呈現載入效果，數值可更改
 		$("#messageArea li").slice(lazyLoadRangeMin,lazyLoadRangeMax).fadeIn(1200);
+		
+		// 調整範圍至下五筆紀錄等待觸發
 		lazyLoadRangeMax = lazyLoadRangeMax-5;
 		lazyLoadRangeMin = lazyLoadRangeMin-5;
 		
@@ -286,39 +306,39 @@ function loadHistory(){
 }
 
 // 訊息發送監聽器
-messageForm.addEventListener('submit', sendMessage, true)
-messageArea.addEventListener('scroll', loadHistory, true)
+messageForm.addEventListener('submit', sendMessage, true);
+messageArea.addEventListener('scroll', loadHistory, true);
 
 // 頁面完成後先做連線
-$(document).ready(function(event){
+$(document).ready(function(event) {
 	
 	// 取得使用者名稱
 	username = sessionStorage.getItem("username");
 	
-	// 進行歷史紀錄提取
+	// 進行歷史紀錄提取，並獲取總筆數及計算範圍數值
 	historyMessageLength = getHistory();
-	lazyLoadRangeMax = historyMessageLength-5;
-	lazyLoadRangeMin = historyMessageLength-10;
+	lazyLoadRangeMax = historyMessageLength - 5;
+	lazyLoadRangeMin = historyMessageLength - 10;
 	
 	// 進行 websocket 連線
 	connect(event);
 	
-})
+});
 
 // 擷取檔案資訊
-$('#file').change(function(e){
+$('#file').change(function(e) {
 	
 	uploadFileObject = e.target.files[0];
 	uploadFileName = e.target.files[0].name;
 	uploadFileType = e.target.files[0].type;
 	
-})
+});
 
 // 上傳檔案
-$('#sendFile').click(function(){
+$('#sendFile').click(function() {
 	
 	// 防呆
-	if(uploadFileObject==null){
+	if (uploadFileObject == null) {
 		
 		alert("請選擇檔案再上傳");
 		
@@ -332,20 +352,20 @@ $('#sendFile').click(function(){
 			
 			  type : "POST",
 			  url : "/sendFile",
-			  cache: false,
-			  processData: false,
-			  contentType: false,
-			  async: false,
+			  cache : false,
+			  processData : false,
+			  contentType : false,
+			  async : false,
 			  data : form,
-			  beforeSend : function(){
+			  beforeSend : function() {
 				// 開啟 "上傳中.."  
 				$("#sending").removeClass("hidden");
 				
 			  },
-			  success :function(){
+			  success : function() {
 				  
 			  },
-			  complete : function(){
+			  complete : function() {
 				  
 				  sendMessage();
 				  
@@ -360,4 +380,4 @@ $('#sendFile').click(function(){
 		
 	}
 	
-})
+});

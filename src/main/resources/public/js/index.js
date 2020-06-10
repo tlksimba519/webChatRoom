@@ -1,7 +1,7 @@
 /*
  * 表單送出後存下使用者名稱
  */
-$("form").submit(function(){
+$("form").submit(function() {
 	
 	sessionStorage.setItem("username", $("#name").val());
 
@@ -12,19 +12,19 @@ $("form").submit(function(){
  */
 $("#login").validate({
 	
-	rules: {
+	rules : {
 		
-		UserName: "required",
+		UserName : "required",
 		
-		Password: "required",
+		Password : "required",
 		
 	},
 	
-	messages:{
+	messages : {
 		
-		UserName: "必填",
+		UserName : "必填",
 		
-		Password: "必填",
+		Password : "必填",
 		
 	}
 	
