@@ -21,6 +21,7 @@ function accessHistory(historyCount) {
 			  var data = response.responseJSON;
 			  
 			  for(var i = 1;i <= Object.keys(data).length;i++) {
+				  
 				  // 判定是否為最後一筆資料，若是則關閉事件監聽器
 				  if(data[i.toString()] == "end") {
 
@@ -36,6 +37,7 @@ function accessHistory(historyCount) {
 		
 				      var usernameElement = getUsernameElement(data[i.toString()][1]);
 				      messageElement.appendChild(usernameElement);
+				      
 				      // 檔案處理  
 				      if(data[i.toString()][2].search("file") != -1) {
 				        	
@@ -46,6 +48,7 @@ function accessHistory(historyCount) {
 				    	  href.value = data[i.toString()][2];
 				    	  textElement.setAttributeNode(href);
 				    	  textElement.setAttributeNode(download);
+				    	  
 				    	  // 圖片預覽處理
 				    	  if(data[i.toString()][2].search("jpg") != -1 || 
 				    			  data[i.toString()][2].search("png") != -1) {
@@ -78,6 +81,7 @@ function accessHistory(historyCount) {
 				      messageElement.appendChild(document.createElement('br'));
 				      messageElement.appendChild(textElement);
 				      messageArea.prepend(messageElement);
+				      messageArea.scrollTop = 150;
 
 				  }
 				  

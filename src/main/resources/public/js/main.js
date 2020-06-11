@@ -16,12 +16,15 @@ var fileInput = document.querySelector('#file');
  */
 // 建立STOMP物件
 var stompClient = null;
+
 // 儲存使用者名稱
 var username = null;
+
 // 儲存檔案參數
 var uploadFileObject = null;
 var uploadFileName = null;
 var uploadFileType = null;
+
 // 記錄歷史訊息次數
 var historyCount = 0;
 
@@ -39,10 +42,10 @@ function connect(event) {
 
     if (username != null) {
 
-    	//顯示聊天室
+    	// 顯示聊天室
         chatPage.classList.remove('hidden');
         
-        //建立sockJS to STOMP
+        // 建立sockJS to STOMP
         var socket = new SockJS('/chatroom');
         stompClient = Stomp.over(socket);
 
@@ -59,19 +62,21 @@ function connect(event) {
  * 描述 : 連線建立後訂閱channel，並廣播使用者上線通知
  */
 function onConnected() {
-    //訂閱/topic/public
+    // 訂閱/topic/public
     stompClient.subscribe('/topic/public', onMessageReceived); //訂閱成功後 callback onMessageReceived()。
 
-    //發送加入訊息至/app/join，也就是送到Controller.addUser()
+    // 發送加入訊息至/app/join，也就是送到Controller.addUser()
     stompClient.send("/app/join", {}, JSON.stringify({
     	
         sender : username,
         type : 'JOIN'
         	
     }))
-    //關閉 "connecting.."
+    
+    // 關閉 "connecting.."
     connectingElement.classList.add('hidden');
-    //播放登入音效
+    
+    // 播放登入音效
     $("#loginSuccess")[0].play();
     
 }
@@ -88,7 +93,7 @@ function onError(error) {
 
 /**
  * 發送訊息 function
- * 描述 : 
+ * 描述 : 判斷檔案類型，包裝不同的訊息回傳給後端
  */
 function sendMessage(event) {
 	
@@ -96,7 +101,7 @@ function sendMessage(event) {
     
     if (stompClient) {
     	
-    	//傳檔案
+    	// 傳檔案
 	    if(uploadFileName){
 	    	
 	    	var chatMessage = {
@@ -109,7 +114,7 @@ function sendMessage(event) {
 	                	
 	        };
 	    	
-	    //傳訊息
+	    // 傳訊息
 	    } else if(messageContent && !uploadFileName){
 	    	
 	    	var chatMessage = {
@@ -120,21 +125,28 @@ function sendMessage(event) {
 	                	
 	        };
 	    	
-	    //空字串阻擋
+	    // 空字串阻擋
 	    } else {
-	    	
+
 	    	event.preventDefault();
 	    	
 	    	return;
 	    	
 	    }
+	    
 	        // 發送訊息至/app/chat，也就是送到Controller.sendMessage()
 	        stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
-	        //清空輸入欄
+	        
+	        // 清空輸入欄
 	        messageContent = null;
 	        messageInput.value = null;
 	        fileInput.value = null;
 	        
+	        // 清除檔案資訊
+			uploadFileObject = null;
+			uploadFileName = null;
+			uploadFileType = null;
+			
     }
     
     event.preventDefault();
@@ -147,6 +159,7 @@ function sendMessage(event) {
 function onMessageReceived(payload) {
 	
     var message = JSON.parse(payload.body);
+    
     // 使用<li>tag加入messageArea
     var messageElement = document.createElement('li');
     
@@ -196,6 +209,7 @@ function onMessageReceived(payload) {
 	    	
 	    	src.value = message.filePath;
 	    	image.setAttributeNode(src);
+	    	
 	    	// 設定預覽圖大小
 	    	image.style['width'] = "400px";
 	    	image.style['height'] = "300px";
@@ -222,8 +236,10 @@ function onMessageReceived(payload) {
     messageElement.appendChild(textElement);
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;
+    
     // 關閉 "上傳中.."
     $("#sending").addClass("hidden");
+    
     // 播放訊息通知聲
     $("#messageReceived")[0].play();
     
@@ -283,6 +299,7 @@ function getUsernameElement(sender) {
  * 第二次以後歷史訊息讀取，由事件觸發，實作lazy loading。
  */
 function loadHistory() {
+	
 	// 捲軸接近頂端時載入歷史訊息
 	if(messageArea.scrollTop < 50){
 		
@@ -344,6 +361,7 @@ $('#sendFile').click(function() {
 			  contentType : false,
 			  data : form,
 			  beforeSend : function() {
+				  
 				// 開啟 "上傳中.."  
 				$("#sending").removeClass("hidden");
 				
@@ -358,11 +376,6 @@ $('#sendFile').click(function() {
 			  },
 			  
 		});
-		
-		// 清除檔案資訊
-		uploadFileObject = null;
-		uploadFileName = null;
-		uploadFileType = null;
 		
 	}
 	
