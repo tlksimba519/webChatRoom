@@ -116,10 +116,10 @@ public class MainController {
 	 * 歷史紀錄撈取
 	 * 描述 : 於聊天室主頁載入時執行並回傳歷史訊息給前端渲染。
 	 */
-	@PostMapping("/getHistory")
-	public @ResponseBody Map<String, Object> history() throws SQLException {
+	@PostMapping("/accessHistory")
+	public @ResponseBody Map<String, Object> history(@RequestParam int historyCount) throws SQLException {
 		
-		Map<String, Object> result = chatModel.loadMessage(conn.getConn());
+		Map<String, Object> result = chatModel.loadMessage(conn.getConn(), historyCount);
 		
 		return result;
 		

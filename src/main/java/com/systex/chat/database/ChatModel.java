@@ -18,13 +18,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChatModel {
 	
-	private final String validateUserCMD = "SELECT * FROM chatmemberaccount WHERE USERNAME = ?";
-	private final String signUpCMD = "INSERT INTO chatmemberaccount(USERNAME,PASSWORD) VALUES (?,?)";
-	private final String loginCMD = "SELECT * FROM chatmemberaccount WHERE USERNAME = ? AND PASSWORD = ?";
-	private final String saveTextCMD = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
-	private final String saveFileCMD = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
-	private final String loadHistoryCMD = "SELECT * FROM history ORDER BY TIME ASC";
+	private final String accountTable = "chatmemberaccount";
+	private final String historyTable = "history";
 	
+	//private final String validateUserCMD = "SELECT * FROM ? WHERE USERNAME = ?";
+	//private final String signUpCMD = "INSERT INTO ?(USERNAME,PASSWORD) VALUES (?,?)";
+	//private final String loginCMD = "SELECT * FROM ? WHERE USERNAME = ? AND PASSWORD = ?";
+	//private final String saveTextCMD = "INSERT INTO ?(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
+	//private final String saveFileCMD = "INSERT INTO ?(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
+	//private final String loadHistoryCMD = "SELECT * FROM ? ORDER BY TIME DESC LIMIT ?,5";
+
+	int historyMessageIndex = 0;
 	/*
 	 * 註冊功能
 	 * 描述 : 獲取使用者帳號密碼，透過查詢指令確認是否為已註冊帳號，若不是則新增此帳戶資訊至資料庫
@@ -32,6 +36,8 @@ public class ChatModel {
 	public String signUp(Database d, Connection conn) throws SQLException {
 
 		String status = "";
+		String validateUserCMD = "SELECT * FROM " + accountTable + " WHERE USERNAME = ?";
+		String signUpCMD = "INSERT INTO " + accountTable + "(USERNAME,PASSWORD) VALUES (?,?)";
 		
 		try {
 
@@ -71,6 +77,7 @@ public class ChatModel {
 	public String login(Database d, Connection conn) throws SQLException {
 		
 		String status = "";
+		String loginCMD = "SELECT * FROM " + accountTable + " WHERE USERNAME = ? AND PASSWORD = ?";
 		
 		try {
 			
@@ -98,16 +105,6 @@ public class ChatModel {
 		
 		return status;
 		
-	}
-	
-	/*
-	 * 登出功能
-	 * 描述 : 註冊功能為暫時連線需求，註冊完畢即先釋放connection物件
-	 */
-	public void logout(Connection conn) throws SQLException {
-
-		conn.close();
-
 	}
 	
 	/*
@@ -151,13 +148,14 @@ public class ChatModel {
 	public void storeMessage(String user, String content, String type, Connection conn) throws SQLException {
 		
 		String cmd = null;
+		String saveTextCMD = "INSERT INTO " + historyTable + "(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
+		String saveFileCMD = "INSERT INTO " + historyTable + "(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
 		
 		if(type.equals("file")) {
 			
 			cmd = saveFileCMD;
 			
-		}
-		else {
+		} else {
 			
 			cmd = saveTextCMD;
 			
@@ -173,16 +171,37 @@ public class ChatModel {
 	
 	/*
 	 * 讀取訊息
-	 * 描述 : 使用查詢指令按時間排序後包裝成Map回傳給controller轉換成json。
+	 * 描述 : 使用查詢指令按時間排序後包成Map回傳給controller轉換成json。
 	 */
-	public Map<String, Object> loadMessage(Connection conn) throws SQLException {
+	public Map<String, Object> loadMessage(Connection conn,int historyCount) throws SQLException {
+		// 資料索引值
+		int dataIndex = 1;
+		// 資料總數
+		int total = 0;
+		// 每次存取資料量
+		int dataPerTime = 5;
 		
-		int index = 1;
+		String getCountCMD = "SELECT COUNT(*) FROM " + historyTable;
+		String loadHistoryCMD = "SELECT * FROM " + historyTable + " ORDER BY TIME DESC LIMIT ?,?";
+		
 		Map<String, Object> result = new HashMap<String, Object>();
 		ArrayList<String>temp = new ArrayList<String>();
 		
-		PreparedStatement ps = conn.prepareStatement(loadHistoryCMD);
+		// 先下COUNT(*)指令獲得歷史紀錄總筆數
+		PreparedStatement ps = conn.prepareStatement(getCountCMD);
 		ResultSet rs = ps.executeQuery();
+		
+		if(rs.next()) {
+			
+			total = rs.getInt(1);
+		
+		}
+		
+		ps = conn.prepareStatement(loadHistoryCMD);
+		// 按照前端目前提取次數變更指令LIMIT範圍
+		ps.setInt(1, historyCount*dataPerTime);
+		ps.setInt(2, dataPerTime);
+		rs = ps.executeQuery();
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnsNumber = rsmd.getColumnCount();
 		
@@ -202,9 +221,16 @@ public class ChatModel {
 				
 			}
 			
-			result.put(Integer.toString(index), temp.toArray());
+			result.put(Integer.toString(dataIndex), temp.toArray());
 			
-			index++;
+			dataIndex++;
+			
+		}
+		
+		// 若此次存取超出總筆數，在回傳map最後加上end供前端辨認
+		if(historyCount * dataPerTime > total) {
+			
+			result.put(Integer.toString(dataIndex), "end");
 			
 		}
 		

@@ -170,6 +170,12 @@ button.accent {
     
 }
 
+li{
+	
+	animation: fadein 2s;
+	
+}
+
 #chat-page .event-message {
 	
     width : 100%;
@@ -323,4 +329,13 @@ button.accent {
         
     }
     
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@-webkit-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }

@@ -22,10 +22,8 @@ var username = null;
 var uploadFileObject = null;
 var uploadFileName = null;
 var uploadFileType = null;
-// 歷史紀錄實現lazy loading使用變數
-var lazyLoadRangeMin = 0;
-var lazyLoadRangeMax = 0;
-var historyMessageLength = 0;
+// 記錄歷史訊息次數
+var historyCount = 0;
 
 /**
  * 頭像顏色表
@@ -282,25 +280,14 @@ function getUsernameElement(sender) {
 }
 
 /**
- * 載入歷史訊息，實作lazy loading，一次存取五筆紀錄。
+ * 第二次以後歷史訊息讀取，由事件觸發，實作lazy loading。
  */
 function loadHistory() {
-	
-	// scroll值為100  設定大於100多一點時觸發
-	if(messageArea.scrollTop < 110){ 
-		// 最小值為負數代表最後一次存取不足五筆 故縮小範圍
-		if(lazyLoadRangeMin < 0){ 
-			
-			lazyLoadRangeMin = 0;
-			
-		}
+	// 捲軸接近頂端時載入歷史訊息
+	if(messageArea.scrollTop < 50){
 		
-		// 使用fadeIn呈現載入效果，數值可更改
-		$("#messageArea li").slice(lazyLoadRangeMin,lazyLoadRangeMax).fadeIn(1200);
-		
-		// 調整範圍至下五筆紀錄等待觸發
-		lazyLoadRangeMax = lazyLoadRangeMax-5;
-		lazyLoadRangeMin = lazyLoadRangeMin-5;
+		accessHistory(historyCount);
+		historyCount = historyCount + 1;
 		
 	}
 	
@@ -316,10 +303,9 @@ $(document).ready(function(event) {
 	// 取得使用者名稱
 	username = sessionStorage.getItem("username");
 	
-	// 進行歷史紀錄提取，並獲取總筆數及計算範圍數值
-	historyMessageLength = getHistory();
-	lazyLoadRangeMax = historyMessageLength - 5;
-	lazyLoadRangeMin = historyMessageLength - 10;
+	// 進行初次歷史訊息讀取，並開始記錄讀取次數
+	accessHistory(historyCount);
+	historyCount = historyCount + 1;
 	
 	// 進行 websocket 連線
 	connect(event);
