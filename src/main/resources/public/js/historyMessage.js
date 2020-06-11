@@ -11,7 +11,6 @@ function getHistory() {
 		  type : "POST",
 		  url : "/getHistory",
 		  dataType : "json",
-		  async : false,
 		  complete : function(response) {
 			  
 			  var data = response.responseJSON;

@@ -99,7 +99,7 @@ function sendMessage(event) {
     if (stompClient) {
     	
     	//傳檔案
-	    if(uploadFileName != null && messageContent == null){
+	    if(uploadFileName){
 	    	
 	    	var chatMessage = {
 	    			
@@ -111,15 +111,8 @@ function sendMessage(event) {
 	                	
 	        };
 	    	
-	    //空字串阻擋
-	    } else if(messageContent == null && uploadFileName == null){
-	    	
-	    	event.preventDefault();
-	    	
-	    	return;
-	    	
 	    //傳訊息
-	    } else {
+	    } else if(messageContent && !uploadFileName){
 	    	
 	    	var chatMessage = {
 	    			
@@ -129,12 +122,20 @@ function sendMessage(event) {
 	                	
 	        };
 	    	
+	    //空字串阻擋
+	    } else {
+	    	
+	    	event.preventDefault();
+	    	
+	    	return;
+	    	
 	    }
 	        // 發送訊息至/app/chat，也就是送到Controller.sendMessage()
 	        stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
 	        //清空輸入欄
-	        messageInput.value = '';
-	        fileInput.value = '';
+	        messageContent = null;
+	        messageInput.value = null;
+	        fileInput.value = null;
 	        
     }
     
@@ -355,7 +356,6 @@ $('#sendFile').click(function() {
 			  cache : false,
 			  processData : false,
 			  contentType : false,
-			  async : false,
 			  data : form,
 			  beforeSend : function() {
 				// 開啟 "上傳中.."  

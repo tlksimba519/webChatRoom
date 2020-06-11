@@ -25,7 +25,7 @@ public class ConnectionObject {
         
     }
 	
-	public void destory() throws SQLException {
+	public void destroy() throws SQLException {
 		
         conn.close();
         
