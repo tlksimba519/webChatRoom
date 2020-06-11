@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectionObject {
+	
 	// db資訊
 	private  final String dbInfo = "jdbc:mysql://localhost:3306/mysql?serverTimezone=UTC";
 	private  final String dbUser = "root";
@@ -21,6 +22,12 @@ public class ConnectionObject {
 	public void init() throws SQLException {
 		
         conn = DriverManager.getConnection(dbInfo, dbUser, dbPassword);
+        
+    }
+	
+	public void destory() throws SQLException {
+		
+        conn.close();
         
     }
 	

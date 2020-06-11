@@ -1,3 +1,7 @@
+/**
+ * 獲得歷史訊息
+ * 回傳data格式為{ "1" : [時間, 傳訊者, 訊息(文字或檔案路徑)], "2" = [時間, 傳訊者, 訊息(文字或檔案路徑)], ...}
+ */
 function getHistory() {
 	
 	var dataLength = 0;
@@ -12,7 +16,7 @@ function getHistory() {
 			  
 			  var data = response.responseJSON;
 			  
-			  for(var i=1;i<=Object.keys(data).length;i++) {
+			  for(var i = 1;i <= Object.keys(data).length;i++) {
 				  
 				  var messageElement = document.createElement('li');
 				  messageElement.classList.add('chat-message');
@@ -23,7 +27,7 @@ function getHistory() {
 			      var usernameElement = getUsernameElement(data[i.toString()][1]);
 			      messageElement.appendChild(usernameElement);
 			        
-			      if(data[i.toString()][2].search("file")!=-1) {
+			      if(data[i.toString()][2].search("file") != -1) {
 			        	
 			    	  var textElement = document.createElement('a');
 			    	  var download = document.createAttribute("download");
@@ -68,7 +72,7 @@ function getHistory() {
 			      
 			  }
 			  // 初始化只顯示五筆歷史訊息，並回傳總筆數
-			  $("#messageArea li").slice(0,-5).hide();
+			  $("#messageArea li").slice(0, -5).hide();
 			  dataLength = Object.keys(data).length;
 
 		  },

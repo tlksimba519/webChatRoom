@@ -16,28 +16,27 @@ import org.springframework.stereotype.Component;
  * 資料庫model
  */
 @Component
-public class DatabaseModel {
-
-	private final String accountTable = "chatmemberaccount";
-	private final String saveText = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
-	private final String saveFile = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
-	private final String loadMSG = "SELECT * FROM history ORDER BY TIME ASC";
+public class ChatModel {
+	
+	private final String validateUserCMD = "SELECT * FROM chatmemberaccount WHERE USERNAME = ?";
+	private final String signUpCMD = "INSERT INTO chatmemberaccount(USERNAME,PASSWORD) VALUES (?,?)";
+	private final String loginCMD = "SELECT * FROM chatmemberaccount WHERE USERNAME = ? AND PASSWORD = ?";
+	private final String saveTextCMD = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
+	private final String saveFileCMD = "INSERT INTO history(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
+	private final String loadHistoryCMD = "SELECT * FROM history ORDER BY TIME ASC";
 	
 	/*
 	 * 註冊功能
 	 * 描述 : 獲取使用者帳號密碼，透過查詢指令確認是否為已註冊帳號，若不是則新增此帳戶資訊至資料庫
 	 */
-	public String signup(Database d,Connection conn) throws SQLException {
+	public String signUp(Database d, Connection conn) throws SQLException {
 
 		String status = "";
 		
 		try {
-			
-			String checkSQL = "SELECT * FROM " + accountTable + " WHERE USERNAME = '"
-					+ d.getID()+ "'";
-			String signupSQL = "INSERT INTO " + accountTable + "(USERNAME,PASSWORD) VALUES (?,?)";
-			
-			PreparedStatement ps = conn.prepareStatement(checkSQL);
+
+			PreparedStatement ps = conn.prepareStatement(validateUserCMD);
+			ps.setString(1, d.getID());
 			ResultSet rs = ps.executeQuery();
 			
 			if(rs.next()) {
@@ -46,7 +45,7 @@ public class DatabaseModel {
 				
 			} else {
 				
-				ps = conn.prepareStatement(signupSQL);
+				ps = conn.prepareStatement(signUpCMD);
 				ps.setString(1, d.getID());
 				ps.setString(2, hash(d.getPasswd()));
 				ps.executeUpdate();
@@ -69,15 +68,15 @@ public class DatabaseModel {
 	 * 登入功能
 	 * 描述 : 獲取使用者帳號密碼，比對是否為會員。
 	 */
-	public String login(Database d,Connection conn) throws SQLException {
+	public String login(Database d, Connection conn) throws SQLException {
 		
 		String status = "";
 		
 		try {
 			
-			String loginSQL = "SELECT * FROM " + accountTable + " WHERE USERNAME = '" + d.getID()
-				+ "' AND PASSWORD = '" + hash(d.getPasswd()) + "'";
-			PreparedStatement ps = conn.prepareStatement(loginSQL);
+			PreparedStatement ps = conn.prepareStatement(loginCMD);
+			ps.setString(1, d.getID());
+			ps.setString(2, hash(d.getPasswd()));
 			ResultSet rs = ps.executeQuery();
 			
 			if(rs.next()) {
@@ -127,7 +126,7 @@ public class DatabaseModel {
 			
 			StringBuilder sb = new StringBuilder();
 			
-			for(int i=0;i<bytes.length;i++) {
+			for(int i = 0;i < bytes.length;i++) {
 				
 				sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
 				
@@ -149,25 +148,25 @@ public class DatabaseModel {
 	 * 儲存訊息
 	 * 描述 : 透過獲得訊息類型判斷來切換不同指令儲存訊息
 	 */
-	public void messageStorage(String user,String content,String type,Connection conn) throws SQLException {
+	public void storeMessage(String user, String content, String type, Connection conn) throws SQLException {
 		
 		String cmd = null;
 		
 		if(type.equals("file")) {
 			
-			cmd = saveFile;
+			cmd = saveFileCMD;
 			
 		}
 		else {
 			
-			cmd = saveText;
+			cmd = saveTextCMD;
 			
 		}
 		
 		PreparedStatement ps = conn.prepareStatement(cmd);
-		ps.setString(1,LocalDateTime.now().toString());
-		ps.setString(2,user);
-		ps.setString(3,content);
+		ps.setString(1, LocalDateTime.now().toString());
+		ps.setString(2, user);
+		ps.setString(3, content);
 		ps.executeUpdate();
 		
 	}
@@ -176,13 +175,13 @@ public class DatabaseModel {
 	 * 讀取訊息
 	 * 描述 : 使用查詢指令按時間排序後包裝成Map回傳給controller轉換成json。
 	 */
-	public Map<String, Object> messageLoad(Connection conn) throws SQLException {
+	public Map<String, Object> loadMessage(Connection conn) throws SQLException {
 		
 		int index = 1;
 		Map<String, Object> result = new HashMap<String, Object>();
 		ArrayList<String>temp = new ArrayList<String>();
 		
-		PreparedStatement ps = conn.prepareStatement(loadMSG);
+		PreparedStatement ps = conn.prepareStatement(loadHistoryCMD);
 		ResultSet rs = ps.executeQuery();
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnsNumber = rsmd.getColumnCount();
@@ -191,7 +190,7 @@ public class DatabaseModel {
 			
 			temp.clear();
 			
-			for(int i=1;i<=columnsNumber;i++) {
+			for(int i = 1;i <= columnsNumber;i++) {
 				
 				if(rs.getString(i).equals("")) {
 					
@@ -203,7 +202,7 @@ public class DatabaseModel {
 				
 			}
 			
-			result.put(Integer.toString(index),temp.toArray());
+			result.put(Integer.toString(index), temp.toArray());
 			
 			index++;
 			

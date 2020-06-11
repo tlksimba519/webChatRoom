@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("com.systex.chat.database")
 public class ConnectionConfig {
 	
-	@Bean(initMethod = "init")
+	@Bean(initMethod = "init", destroyMethod = "destroy")
 	ConnectionObject conn() {
 		
         return new ConnectionObject();

@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.systex.chat.database.ConnectionObject;
 import com.systex.chat.database.Database;
-import com.systex.chat.database.DatabaseModel;
+import com.systex.chat.database.ChatModel;
 import com.systex.chat.file.file;
 import com.systex.chat.message.ChatMessage;
 
@@ -28,13 +28,13 @@ import com.systex.chat.message.ChatMessage;
 public class MainController {
 	
 	@Autowired
-	DatabaseModel databaseModel;
+	ChatModel chatModel;
 	
 	@Autowired
-	Database databaseBean;
+	Database dbBean;
 	
 	@Autowired
-	file f;
+	file fileModel;
 	
 	@Autowired
 	ConnectionObject conn;
@@ -48,10 +48,10 @@ public class MainController {
 
 		String status;
 		
-		databaseBean.setID(UserName);
-		databaseBean.setPasswd(Password);
+		dbBean.setID(UserName);
+		dbBean.setPasswd(Password);
 		
-		status = databaseModel.signup(databaseBean, conn.getConn());
+		status = chatModel.signUp(dbBean, conn.getConn());
 		
 		if(status.equals("success")) {
 			
@@ -78,10 +78,10 @@ public class MainController {
 
 		String status;
 		
-		databaseBean.setID(UserName);
-		databaseBean.setPasswd(Password);
+		dbBean.setID(UserName);
+		dbBean.setPasswd(Password);
 		
-		status = databaseModel.login(databaseBean, conn.getConn());
+		status = chatModel.login(dbBean, conn.getConn());
 		
 		if(status.equals("success")) {
 			
@@ -108,7 +108,7 @@ public class MainController {
 	@PostMapping("/sendFile")
 	public void sendFile(HttpServletResponse response, @RequestParam String username, @RequestParam MultipartFile file) throws SQLException {
 		
-		f.saveFile(username,file);
+		fileModel.saveFile(username, file);
 	
 	}
 	
@@ -119,7 +119,7 @@ public class MainController {
 	@PostMapping("/getHistory")
 	public @ResponseBody Map<String, Object> history() throws SQLException {
 		
-		Map<String, Object> result = databaseModel.messageLoad(conn.getConn());
+		Map<String, Object> result = chatModel.loadMessage(conn.getConn());
 		
 		return result;
 		
@@ -143,19 +143,19 @@ public class MainController {
 	/*
 	 * 訊息路由 - 發送訊息
 	 * 描述 : 前端於使用者觸發sendMessage function 後發送/app/chat通知後端有新訊息，controller判斷此訊息是
-	 * 		一般文本或檔案，提供messageStorage不同參數來記錄訊息，記錄完成後一樣轉送STOMP代理。
+	 * 		一般文本或檔案，提供storeMessage不同參數來記錄訊息，記錄完成後一樣轉送STOMP代理。
 	 */
     @MessageMapping("/chat")
     @SendTo("/topic/public")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) throws SQLException {
     			
-		if(chatMessage.getFileName()!=null) {
+		if(chatMessage.getFileName() != null) {
 			
-			databaseModel.messageStorage(chatMessage.getSender(), chatMessage.getFilePath(), "file", conn.getConn());
+			chatModel.storeMessage(chatMessage.getSender(), chatMessage.getFilePath(), "file", conn.getConn());
 			
 		} else {
 			
-			databaseModel.messageStorage(chatMessage.getSender(), chatMessage.getContent(), "text", conn.getConn());
+			chatModel.storeMessage(chatMessage.getSender(), chatMessage.getContent(), "text", conn.getConn());
 			
 		}
 		

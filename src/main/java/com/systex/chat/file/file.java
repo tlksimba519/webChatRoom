@@ -20,7 +20,9 @@ public class file {
 		try {
 			
 			InputStream input = file.getInputStream();
-			FileOutputStream output = new FileOutputStream(new File("src/main/resources/public/file/" + username + "_" + file.getOriginalFilename()));
+			FileOutputStream output = new FileOutputStream(new File("src/main/resources/public/file/"
+					+ username + "_" + file.getOriginalFilename()));
+			
 			int length = -1;
 			
             // 從來源檔案讀取資料至緩衝區 
