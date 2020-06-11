@@ -114,21 +114,26 @@ public class ChatModel {
 	public String hash(String Unencrypt) {
 		
 		String encrypted = null;
+		char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'a', 'b', 'c', 'd', 'e', 'f'};
 		
 		try {
 			
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			md.update(Unencrypt.getBytes());
+			MessageDigest md = MessageDigest.getInstance("SHA1");
+			md.update(Unencrypt.getBytes("UTF-8"));
 			byte[] bytes = md.digest();
-			
+			char buffer[] = new char[bytes.length*2];
+			int k = 0;
 			StringBuilder sb = new StringBuilder();
 			
 			for(int i = 0;i < bytes.length;i++) {
 				
-				sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+				buffer[k++] = hex[bytes[i] >>> 4 & 0xf];
+				buffer[k++] = hex[bytes[i] & 0xf];
 				
 			}
 			
+			sb.append(buffer);
 			encrypted = sb.toString();
 		
 		} catch(Exception e) {
