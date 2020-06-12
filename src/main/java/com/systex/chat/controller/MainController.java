@@ -50,7 +50,7 @@ public class MainController {
 		dbBean.setID(UserName);
 		dbBean.setPasswd(Password);
 		
-		LoginStatus status = chatModel.login(dbBean, conn.getConn());
+		LoginStatus status = chatModel.signUp(dbBean, conn.getConn());
 		
 		response.sendRedirect(status.getUrl());
 
