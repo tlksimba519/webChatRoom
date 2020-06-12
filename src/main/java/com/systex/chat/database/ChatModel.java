@@ -47,7 +47,7 @@ public class ChatModel {
 				ps.setString(1, d.getID());
 				ps.setString(2, hash(d.getPasswd()));
 				ps.executeUpdate();
-				return LoginStatus.Success;
+				return LoginStatus.SignupSuccess;
 				
 			}
 
@@ -78,7 +78,7 @@ public class ChatModel {
 			
 			if(rs.next()) {
 				
-				return LoginStatus.Success;
+				return LoginStatus.LoginSuccess;
 				
 			} else {
 				

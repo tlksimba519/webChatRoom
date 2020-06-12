@@ -52,28 +52,7 @@ public class MainController {
 		
 		LoginStatus status = chatModel.login(dbBean, conn.getConn());
 		
-		switch(status) {
-		
-			case Success :
-				
-				response.sendRedirect("/main.html");
-				break;
-				
-			case AlreadyUsed :
-				
-				response.sendRedirect("/loginFail.html");
-				break;
-				
-			case Error :
-				
-				response.sendRedirect("/error.html");
-				break;
-				
-			default :
-				
-				break;
-				
-		}
+		response.sendRedirect(status.getUrl());
 
 	}
 	
@@ -89,28 +68,7 @@ public class MainController {
 		
 		LoginStatus status = chatModel.login(dbBean, conn.getConn());
 		
-		switch(status) {
-		
-			case Success :
-				
-				response.sendRedirect("/main.html");
-				break;
-				
-			case Incorrect :
-				
-				response.sendRedirect("/loginFail.html");
-				break;
-				
-			case Error :
-				
-				response.sendRedirect("/error.html");
-				break;
-				
-			default :
-				
-				break;
-				
-		}
+		response.sendRedirect(status.getUrl());
 
 	}
 	
