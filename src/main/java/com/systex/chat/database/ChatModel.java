@@ -21,21 +21,13 @@ public class ChatModel {
 	private final String accountTable = "chatmemberaccount";
 	private final String historyTable = "history";
 	
-	//private final String validateUserCMD = "SELECT * FROM ? WHERE USERNAME = ?";
-	//private final String signUpCMD = "INSERT INTO ?(USERNAME,PASSWORD) VALUES (?,?)";
-	//private final String loginCMD = "SELECT * FROM ? WHERE USERNAME = ? AND PASSWORD = ?";
-	//private final String saveTextCMD = "INSERT INTO ?(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,?,'')";
-	//private final String saveFileCMD = "INSERT INTO ?(TIME,USERNAME,TEXT,FILEPATH) VALUES (?,?,'',?)";
-	//private final String loadHistoryCMD = "SELECT * FROM ? ORDER BY TIME DESC LIMIT ?,5";
-
-	int historyMessageIndex = 0;
+	loadMessageConfig config = new loadMessageConfig();
 	/*
 	 * 註冊功能
 	 * 描述 : 獲取使用者帳號密碼，透過查詢指令確認是否為已註冊帳號，若不是則新增此帳戶資訊至資料庫
 	 */
-	public String signUp(Database d, Connection conn) throws SQLException {
+	public LoginStatus signUp(Database d, Connection conn) throws SQLException {
 
-		String status = "";
 		String validateUserCMD = "SELECT * FROM " + accountTable + " WHERE USERNAME = ?";
 		String signUpCMD = "INSERT INTO " + accountTable + "(USERNAME,PASSWORD) VALUES (?,?)";
 		
@@ -47,7 +39,7 @@ public class ChatModel {
 			
 			if(rs.next()) {
 				
-				status = "used";
+				return LoginStatus.AlreadyUsed;
 				
 			} else {
 				
@@ -55,18 +47,16 @@ public class ChatModel {
 				ps.setString(1, d.getID());
 				ps.setString(2, hash(d.getPasswd()));
 				ps.executeUpdate();
-				status = "success";
+				return LoginStatus.Success;
 				
 			}
 
 		} catch (Exception e) {
 			
 			e.printStackTrace();
-			status = "fail";
+			return LoginStatus.Error;
 			
 		}
-
-		return status;
 		
 	}
 	
@@ -74,9 +64,9 @@ public class ChatModel {
 	 * 登入功能
 	 * 描述 : 獲取使用者帳號密碼，比對是否為會員。
 	 */
-	public String login(Database d, Connection conn) throws SQLException {
+	public LoginStatus login(Database d, Connection conn) throws SQLException {
 		
-		String status = "";
+		
 		String loginCMD = "SELECT * FROM " + accountTable + " WHERE USERNAME = ? AND PASSWORD = ?";
 		
 		try {
@@ -88,22 +78,20 @@ public class ChatModel {
 			
 			if(rs.next()) {
 				
-				status = "success";
+				return LoginStatus.Success;
 				
 			} else {
 				
-				status = "wrong";
+				return LoginStatus.Incorrect;
 				
 			}
 			
 		} catch (Exception e) {
 
 			e.printStackTrace();
-			status = "fail";
+			return LoginStatus.Error;
 			
 		}
-		
-		return status;
 		
 	}
 	
@@ -179,33 +167,51 @@ public class ChatModel {
 	 * 描述 : 使用查詢指令按時間排序後包成Map回傳給controller轉換成json。
 	 */
 	public Map<String, Object> loadMessage(Connection conn,int historyCount) throws SQLException {
+		
 		// 資料索引值
 		int dataIndex = 1;
-		// 資料總數
-		int total = 0;
+		
 		// 每次存取資料量
 		int dataPerTime = 5;
 		
 		String getCountCMD = "SELECT COUNT(*) FROM " + historyTable;
-		String loadHistoryCMD = "SELECT * FROM " + historyTable + " ORDER BY TIME DESC LIMIT ?,?";
+		String getRangeCMD = "SELECT * FROM " + historyTable + " ORDER BY TIME DESC";
+		String loadHistoryCMD = "SELECT * FROM " + historyTable + " WHERE TIME<=? ORDER BY TIME DESC LIMIT ?,?";
 		
 		Map<String, Object> result = new HashMap<String, Object>();
 		ArrayList<String>temp = new ArrayList<String>();
+		PreparedStatement ps;
+		ResultSet rs;
 		
-		// 先下COUNT(*)指令獲得歷史紀錄總筆數
-		PreparedStatement ps = conn.prepareStatement(getCountCMD);
-		ResultSet rs = ps.executeQuery();
-		
-		if(rs.next()) {
+		// 第一次呼叫保存參數
+		if(historyCount==0) {
 			
-			total = rs.getInt(1);
+			// COUNT(*)指令獲得歷史紀錄總筆數
+			ps = conn.prepareStatement(getCountCMD);
+			rs = ps.executeQuery();
+
+			if (rs.next()) {
+
+				config.setTotal(rs.getInt(1));
+
+			}
+			// 取得當下最新訊息做基準
+			ps = conn.prepareStatement(getRangeCMD);
+			rs = ps.executeQuery();
+			
+			if (rs.next()) {
+
+				config.setLastestMessage(rs.getString(1));
+
+			}
 		
 		}
-		
+
 		ps = conn.prepareStatement(loadHistoryCMD);
 		// 按照前端目前提取次數變更指令LIMIT範圍
-		ps.setInt(1, historyCount*dataPerTime);
-		ps.setInt(2, dataPerTime);
+		ps.setString(1, config.getLastestMessage());
+		ps.setInt(2, historyCount*dataPerTime);
+		ps.setInt(3, dataPerTime);
 		rs = ps.executeQuery();
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnsNumber = rsmd.getColumnCount();
@@ -233,13 +239,44 @@ public class ChatModel {
 		}
 		
 		// 若此次存取超出總筆數，在回傳map最後加上end供前端辨認
-		if(historyCount * dataPerTime > total) {
+		if(historyCount * dataPerTime > config.getTotal()) {
 			
 			result.put(Integer.toString(dataIndex), "end");
 			
 		}
 		
 		return result;
+		
+	}
+	
+	/*
+	 * 讀取訊息參數class
+	 */
+	public class loadMessageConfig{
+		
+		private int total;
+		private String lastestMessage;
+		
+		public int getTotal() {
+			
+			return total;
+			
+		}
+		public void setTotal(int total) {
+			
+			this.total = total;
+			
+		}
+		public String getLastestMessage() {
+			
+			return lastestMessage;
+			
+		}
+		public void setLastestMessage(String lastestMessage) {
+			
+			this.lastestMessage = lastestMessage;
+			
+		}
 		
 	}
 	

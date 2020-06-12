@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /*
@@ -12,16 +13,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectionObject {
 	
-	// db資訊
-	private  final String dbInfo = "jdbc:mysql://localhost:3306/mysql?serverTimezone=UTC";
-	private  final String dbUser = "root";
-	private  final String dbPassword = "Leo0826519";
+	@Value("${databaseInfo}")
+	private String Info;
+	@Value("${databaseUser}")
+	private String User;
+	@Value("${databasePassword}")
+	private String Password;
 	
 	private Connection conn;
 	
 	public void init() throws SQLException {
 		
-        conn = DriverManager.getConnection(dbInfo, dbUser, dbPassword);
+        conn = DriverManager.getConnection(Info, User, Password);
         
     }
 	

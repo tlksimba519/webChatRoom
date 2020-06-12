@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.systex.chat.database.ChatModel;
 import com.systex.chat.database.ConnectionObject;
 import com.systex.chat.database.Database;
-import com.systex.chat.database.ChatModel;
+import com.systex.chat.database.LoginStatus;
 import com.systex.chat.file.file;
 import com.systex.chat.message.ChatMessage;
 
@@ -45,26 +46,33 @@ public class MainController {
 	 */
 	@PostMapping("/signup")
 	public void signup(@RequestParam String UserName, @RequestParam String Password, HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-
-		String status;
 		
 		dbBean.setID(UserName);
 		dbBean.setPasswd(Password);
 		
-		status = chatModel.signUp(dbBean, conn.getConn());
+		LoginStatus status = chatModel.login(dbBean, conn.getConn());
 		
-		if(status.equals("success")) {
-			
-			response.sendRedirect("/index.html");
-			
-		} else if(status.equals("used")) {
+		switch(status) {
+		
+			case Success :
 				
-			response.sendRedirect("/alreadyUsed.html");
+				response.sendRedirect("/main.html");
+				break;
 				
-		} else {
-			
-			response.sendRedirect("/error.html");
-			
+			case AlreadyUsed :
+				
+				response.sendRedirect("/loginFail.html");
+				break;
+				
+			case Error :
+				
+				response.sendRedirect("/error.html");
+				break;
+				
+			default :
+				
+				break;
+				
 		}
 
 	}
@@ -75,28 +83,33 @@ public class MainController {
 	 */
 	@PostMapping("/login")
 	public void login(@RequestParam String UserName, @RequestParam String Password, HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-
-		String status;
 		
 		dbBean.setID(UserName);
 		dbBean.setPasswd(Password);
 		
-		status = chatModel.login(dbBean, conn.getConn());
+		LoginStatus status = chatModel.login(dbBean, conn.getConn());
 		
-		if(status.equals("success")) {
-			
-			response.sendRedirect("/main.html");
-			
-		}
+		switch(status) {
 		
-		else if(status.equals("wrong")) {
+			case Success :
 				
-			response.sendRedirect("/loginFail.html");
+				response.sendRedirect("/main.html");
+				break;
 				
-		} else {
-			
-			response.sendRedirect("/error.html");
-			
+			case Incorrect :
+				
+				response.sendRedirect("/loginFail.html");
+				break;
+				
+			case Error :
+				
+				response.sendRedirect("/error.html");
+				break;
+				
+			default :
+				
+				break;
+				
 		}
 
 	}

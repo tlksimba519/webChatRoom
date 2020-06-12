@@ -5,7 +5,7 @@
 function accessHistory(historyCount) {
 	
 	let form = new FormData();
-	form.append("historyCount",historyCount);
+	form.append("historyCount", historyCount);
 	
 	$.ajax({
 		
