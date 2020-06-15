@@ -327,6 +327,9 @@ $(document).ready(function(event) {
 	// 進行 websocket 連線
 	connect(event);
 	
+	// 設置時間戳
+	$('[data-toggle="tooltip"]').tooltip();
+	
 });
 
 // 擷取檔案資訊

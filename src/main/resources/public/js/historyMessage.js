@@ -31,6 +31,15 @@ function accessHistory(historyCount) {
 					  
 					  var messageElement = document.createElement('li');
 					  messageElement.classList.add('chat-message');
+					  var toggle = document.createAttribute("data-toggle");
+					  toggle.value = "tooltip";
+					  messageElement.setAttributeNode(toggle);
+					  var placement = document.createAttribute("data-placement");
+					  placement.value = "right";
+					  messageElement.setAttributeNode(placement);
+					  var title = document.createAttribute("title")
+					  title.value = data[i.toString()][0];
+					  messageElement.setAttributeNode(title);
 		
 				      var avatarElement = getAvatarElement(data[i.toString()][1]);
 				      messageElement.appendChild(avatarElement);
@@ -81,6 +90,8 @@ function accessHistory(historyCount) {
 				      messageElement.appendChild(document.createElement('br'));
 				      messageElement.appendChild(textElement);
 				      messageArea.prepend(messageElement);
+				      
+				      // 卷軸設置下拉150px處
 				      messageArea.scrollTop = 150;
 
 				  }

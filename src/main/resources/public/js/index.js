@@ -1,3 +1,13 @@
+$(document).ready(function(){
+	
+	if(sessionStorage.getItem("username") != null) {
+		
+		window.location.href = "/main.html";
+		
+	}
+	
+});
+
 /*
  * 表單送出後存下使用者名稱
  */
